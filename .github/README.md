@@ -6,8 +6,9 @@
 
 <p align="center">
   By <a href="https://github.com/SkyWalker541">SkyWalker541</a><br>
-  A free, quiet pixel-art fishing game for retro handhelds, made with LÖVE.<br>
-  Built for the <b>TrimUI Brick</b> on <b>NextUI</b> with <b>PortMaster</b>, and it runs on any computer with LÖVE 11.5.
+  A free, quiet pixel-art fishing game for PortMaster handhelds, made with LÖVE.<br>
+  Tested on the <b>TrimUI Brick</b> (NextUI), and it should work on any device that runs <b>PortMaster</b>.<br>
+  It also runs on any computer with LÖVE 11.5.
 </p>
 
 <p align="center">
@@ -16,7 +17,7 @@
 
 <p align="center">
   <a href="https://github.com/SkyWalker541/Gone-Fishing/releases/latest"><b>Download the latest release</b></a> ·
-  <a href="#install-on-nextui-trimui-brick">Install</a> ·
+  <a href="#install-with-portmaster">Install</a> ·
   <a href="#controls">Controls</a> ·
   <a href="media/trailer.mp4">Watch the trailer</a>
 </p>
@@ -93,15 +94,26 @@ There's no timer and no pressure. Leave it on **idle fishing** and it fishes on 
 | ![Map](images/map.png) | ![Trolling motor menu](images/trolling_menu.png) |
 | Travel between places | The trolling motor menu |
 
-## Install on NextUI (TrimUI Brick)
+## Install with PortMaster
 
-You need PortMaster on the Brick and `gonefishing.zip` from the [latest release](https://github.com/SkyWalker541/Gone-Fishing/releases/latest).
+Gone Fishing is a standard PortMaster port (LÖVE 11.5 runtime, aarch64 and x86_64). It has been tested on the
+**TrimUI Brick** running **NextUI**, and it should work on any handheld that runs PortMaster.
 
-1. **Install PortMaster** if you don't have it. On the Brick, open the **Pak Store** and install **PortMaster** (listed as "PORTS"). Then open **Ports** once so it can finish setting up.
-2. **Unzip `gonefishing.zip`** on your computer. You get:
+You need PortMaster on your device and `gonefishing.zip` from the [latest release](https://github.com/SkyWalker541/Gone-Fishing/releases/latest).
+
+1. **Unzip `gonefishing.zip`** on your computer. You get:
    - `Gone Fishing.sh` (the launcher)
    - `gonefishing/` (the game folder)
-3. **Copy them to the SD card:**
+2. **Copy both** into your device's PortMaster ports folder, the same place your other ports live.
+   On most systems that's the `ports` folder on the SD card; the launcher and the `gonefishing/` folder go side by side.
+3. **Play:** open **Ports** and pick **Gone Fishing**.
+
+### NextUI (TrimUI Brick, tested)
+
+On NextUI the launcher and the game folder go in different places:
+
+1. **Install PortMaster** if you don't have it. On the device, open the **Pak Store** and install **PortMaster** (listed as "PORTS"). Then open **Ports** once so it can finish setting up.
+2. **Copy the files to the SD card:**
 
    | Copy | To |
    |--|--|
@@ -109,7 +121,7 @@ You need PortMaster on the Brick and `gonefishing.zip` from the [latest release]
    | `gonefishing/` | `/Roms/Ports (PORTS)/.ports/` |
 
    `.ports` is a hidden folder. Show hidden files with **Cmd + Shift + .** on a Mac, or **View > Show > Hidden items** on Windows. Create the folder if it isn't there yet.
-4. **Play:** put the card back in the Brick, open **Ports** and pick **Gone Fishing**.
+3. **Play:** put the card back in, open **Ports** and pick **Gone Fishing**.
 
 When you're done, the SD card should look like this:
 ```
@@ -124,12 +136,7 @@ Roms/
             └── saves/        (created the first time you play)
 ```
 
-Plain-text instructions are also in [INSTALL_NEXTUI.txt](INSTALL_NEXTUI.txt).
-
-### Other PortMaster devices
-
-The port follows the standard PortMaster layout (LÖVE 11.5 runtime, aarch64 and x86_64). On other PortMaster systems, copy
-`Gone Fishing.sh` and the `gonefishing/` folder into your usual ports folder.
+Plain-text NextUI instructions are also in [INSTALL_NEXTUI.txt](INSTALL_NEXTUI.txt).
 
 ### On a computer
 
