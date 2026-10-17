@@ -251,7 +251,7 @@ function Wd.build(loc)
   for _, im in pairs(cache) do im:release() end
   cache = {}
   if not waterCanvas then
-    waterCanvas = lg.newCanvas(W, H)
+    waterCanvas = lg.newCanvas(W, H, { dpiscale = 1 })
     stripBatch = lg.newSpriteBatch(waterCanvas, 9000, "stream")
     for i = 0, H do rowQuads[i] = lg.newQuad(0, i, W, 2, W, H) end
   end

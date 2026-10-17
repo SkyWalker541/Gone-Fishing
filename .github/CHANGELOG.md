@@ -6,7 +6,12 @@
 - **Delete a save** with X on the save screen. It asks twice before anything is deleted, and the second question starts
   on "No, keep it".
 - Your existing save moves into slot 1 automatically. Nothing is lost.
+- **Exit to title:** Settings now has one **Save and exit** option, which opens Save now, Exit to title (to switch
+  saves) and Quit game. The separate "Save game" and "Save and quit" rows are gone, so Settings is shorter.
+- A short **Saving… / Saved!** popup shows whenever you save, exit to title or quit.
 - The Settings page shows which save you're playing.
+- **Fixed:** blurry, garbled picture on some devices (for example Retroid Pocket 5 with ROCKNIX), where the screen
+  briefly reports a different scale while going fullscreen. Thanks to the PortMaster crew for tracking it down.
 
 ## v1.1
 - **Fixed:** A and B were swapped. A now casts, reels and strikes, and B reels fast and goes back, matching the

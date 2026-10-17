@@ -397,6 +397,18 @@ G.api = {
     play("oar")
   end,
   save = function() saveGame(); play("buy") end,
+  -- the saving popup: "Saving..." then "Saved!", then the chosen action ("save" stays, "title" or "quit")
+  saveFlow = function(kind)
+    if st.saving then return end
+    st.saving = { t = 0, kind = kind }
+  end,
+  -- save, close the tackle box and fade back to the title screen, where another save can be picked
+  toTitle = function()
+    saveGame()
+    TB.close()
+    st.fade = { t = 0, dir = 1, title = true }
+    play("latch")
+  end,
   petHello = function() petEvent("hello") end,
   applyVolume = function() applyVolume() end,
 }
@@ -1068,6 +1080,18 @@ G.drawSlots = function()
 end
 
 local function update(dt)
+  -- the saving popup holds the buttons until it's done
+  if st.saving then
+    local sv = st.saving
+    sv.t = sv.t + dt
+    if not sv.done and sv.t >= 0.45 then saveGame(); sv.done = true; play("click") end
+    if sv.t >= 1.05 then
+      st.saving = nil
+      if sv.kind == "title" then G.api.toTitle()
+      elseif sv.kind == "quit" then love.event.quit() end
+    end
+    pressed = {}
+  end
   st.time = st.time + dt
   lastInput = lastInput + dt
   local before = game.clock
@@ -1098,6 +1122,15 @@ local function update(dt)
     if fd.dir > 0 and fd.t >= 1 then
       if fd.go then enterPlace(fd.go); fd.go = nil end
       if fd.start then st.mode = "play"; fd.start = nil; toast(Wd.byId[game.loc].name) end
+      if fd.title then
+        -- back on the title: the save just left stays loaded behind it, ready to be picked again
+        fd.title = nil
+        G.lastSlot, G.slot = G.slot or G.lastSlot, nil
+        st = newState()
+        st.fade = fd
+        G.cam.x = clamp(st.boat.x - W / 2, 0, WORLD_W - W)
+        Audio.setMotor(0)
+      end
       fd.dir = -1
     elseif fd.dir < 0 and fd.t <= 0 then
       st.fade = nil
@@ -1948,6 +1981,23 @@ local function render()
   drawHUD()
   drawTitle()
   TB.draw(t)
+  if st.saving then
+    -- a small card with a bobbing float: "Saving..." then "Saved!"
+    local sv = st.saving
+    local a = math.min(1, sv.t / 0.12, (1.05 - sv.t) / 0.12)
+    local pw, ph = 150, 44
+    local x, y = fl(W / 2 - pw / 2), fl(H / 2 - ph / 2)
+    lg.setColor(0.06, 0.08, 0.10, 0.6 * a); lg.rectangle("fill", x + 3, y + 4, pw, ph, 8, 8)
+    lg.setColor(0.13, 0.28, 0.21, a); lg.rectangle("fill", x - 2, y - 2, pw + 4, ph + 4, 9, 9)
+    lg.setColor(0.90, 0.86, 0.74, a); lg.rectangle("fill", x + 2, y + 2, pw - 4, ph - 4, 6, 6)
+    local bx, by = x + 26, y + 22 + (sv.done and 0 or math.sin(sv.t * 14) * 2)
+    lg.setColor(0.45, 0.62, 0.78, 0.5 * a); lg.ellipse("line", bx, y + 30, 9 + (sv.t * 10 % 4), 2)
+    lg.setColor(0.25, 0.18, 0.12, a); lg.rectangle("fill", bx - 0.5, by - 12, 1, 5)
+    lg.setColor(0.86, 0.22, 0.18, a); lg.circle("fill", bx, by - 3, 5)
+    lg.setColor(0.97, 0.95, 0.90, a); lg.arc("fill", bx, by - 3, 5, 0, math.pi)
+    local label = sv.done and "Saved!" or ("Saving" .. string.rep(".", 1 + math.floor(sv.t * 8) % 3))
+    UI.text(label, x + 44, y + 16, sv.done and { 0.16, 0.38, 0.26, a } or { 0.25, 0.18, 0.12, a }, 2)
+  end
   if st.fade then
     lg.setColor(0.02, 0.02, 0.04, clamp(st.fade.t, 0, 1))
     lg.rectangle("fill", 0, 0, W, H)
@@ -1970,7 +2020,7 @@ local function computeScale()
   bigK = math.max(1, math.ceil(s))
   if bigCanvas then bigCanvas:release(); bigCanvas = nil end
   if not exact then
-    bigCanvas = lg.newCanvas(W * bigK, H * bigK)
+    bigCanvas = lg.newCanvas(W * bigK, H * bigK, { dpiscale = 1 })
     bigCanvas:setFilter("linear", "linear")
   end
 end
@@ -1998,7 +2048,7 @@ function love.load(a)
   if args.size then love.window.setMode(args.size[1], args.size[2], { resizable = true }) end
   pcall(love.mouse.setVisible, false)
   computeScale()
-  canvas = lg.newCanvas(W, H)
+  canvas = lg.newCanvas(W, H, { dpiscale = 1 })
   UI.load()
   L.load()
   FD.load(FISH)
@@ -2064,7 +2114,7 @@ function love.quit() saveGame() end
 ---------------------------------------------------------------- self-test (--test)
 function runTest()
   io.stdout:setvbuf("no")
-  local big = lg.newCanvas(W * 2, H * 2)
+  local big = lg.newCanvas(W * 2, H * 2, { dpiscale = 1 })
   local function shot(name)
     render()
     lg.setCanvas(big)
@@ -2295,7 +2345,12 @@ function runTest()
     shot("v02_keyboard")
     pressed.start = true; sim(2.5); shot("v03_playing")
     print("SLOT", G.slot, game.name, love.filesystem.getInfo("save3.lua") and "save3 written" or "no save3")
-    st = newState(); sim(1.5); pressed.a = true; sim(0.4); shot("v04_slots_again")
+    pressed.start = true; sim(1.4); TB.setTab(8); sim(0.3); pressed.a = true; sim(0.2)
+    for _ = 1, 6 do pressed.down = true; sim(0.08) end
+    sim(0.3); shot("v03b_settings"); pressed.a = true; sim(0.4); shot("v03c_exit_menu")
+    pressed.down = true; sim(0.1); pressed.a = true; sim(0.25); shot("v03d_saving"); sim(0.45); shot("v03e_saved"); sim(1.4)
+    print("after exit:", st.mode, G.slot, G.lastSlot)
+    pressed.a = true; sim(0.4); shot("v04_slots_again")
     pressed.up = true; sim(0.1); pressed.up = true; sim(0.1)
     pressed.x = true; sim(0.3); shot("v05_delete1")
     pressed.a = true; sim(0.3); shot("v06_delete2")
@@ -2429,7 +2484,7 @@ function runTest()
   shot("t16_gear_lures")
   for _ = 1, 5 do pressed.r = true; sim(0.15) end
   pressed.a = true; sim(0.1)
-  for _ = 1, 4 do pressed.down = true; sim(0.1) end
+  for _ = 1, 5 do pressed.down = true; sim(0.1) end
   pressed.a = true; sim(0.3); shot("t17_controls")
   pressed.a = true; sim(0.2); shot("t18_controls_wait")
   pressed.y = true; sim(0.3); shot("t19_controls_set")

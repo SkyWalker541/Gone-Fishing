@@ -71,7 +71,7 @@ There's no timer and no pressure. Leave it on **idle fishing** and it fishes on 
   - 11 hats, glasses, tops, vests, neckwear, pants and boots.
   - A retriever, spitz, shorthair or longhair cat as a companion.
   - The preview zooms in on whatever you're changing.
-- **Three save slots**, each with its own name typed on an on-screen keyboard, plus safe deleting with a double confirmation.
+- **Three save slots**, each with its own name typed on an on-screen keyboard, safe deleting with a double confirmation, and **Exit to title** (Settings → Save and exit) to switch saves.
 - **Sound:** recorded ambience for each place, a shuffled soundtrack, and separate volume levels for music, sound effects and nature sounds.
 
 ## Screenshots

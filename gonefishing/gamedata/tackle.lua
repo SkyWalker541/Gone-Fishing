@@ -100,7 +100,7 @@ local function rowsFor(id)
   if id == "log" then return #G.fishAt(s.logLoc) end
   if id == "map" then return #G.LOCS end
   if id == "look" then return #L.OPTIONS end
-  if id == "settings" then return s.sub == "controls" and #ACTIONS + 1 or 8 end
+  if id == "settings" then return s.sub == "controls" and #ACTIONS + 1 or s.sub == "exit" and 3 or 7 end
   return 0
 end
 
@@ -215,8 +215,14 @@ function T.update(dt, pressed)
       if i <= #ACTIONS then s.capture, s.captureDelay = ACTIONS[i].id, 2; G.play("click")
       else g.binds = { cast = "a", fast = "b", pet = "x", box = "start", motor = "y" }; flash("Buttons reset."); G.play("buy") end
     end
+  elseif tab == "settings" and s.sub == "exit" then
+    if pressed.a then
+      if i == 1 then G.api.saveFlow("save")
+      elseif i == 2 then s.sub = nil; G.api.saveFlow("title")
+      else G.api.saveFlow("quit") end
+    end
   elseif tab == "settings" then
-    local vk = VOLS[i - 2]
+    local vk = VOLS[i - 1]
     if vk then
       -- volume rows: left and right change the level, A steps it up and wraps round
       if pressed.left or pressed.right or pressed.a then
@@ -226,11 +232,10 @@ function T.update(dt, pressed)
         G.api.applyVolume()
         G.play("click")
       end
-    elseif pressed.a or ((pressed.left or pressed.right) and i == 2) then
-      if i == 1 then G.api.save(); flash("Saved.")
-      elseif i == 2 then g.idle = not g.idle; G.play("click")
-      elseif i == 7 then s.sub = "controls"; G.play("click")
-      elseif i == 8 then G.api.save(); love.event.quit() end
+    elseif pressed.a or ((pressed.left or pressed.right) and i == 1) then
+      if i == 1 then g.idle = not g.idle; G.play("click")
+      elseif i == 6 then s.sub = "controls"; G.play("click")
+      elseif i == 7 then s.sub = "exit"; G.play("click") end
     end
   end
 end
@@ -588,14 +593,29 @@ local function pageSettings(t)
     return
   end
   header("Settings", g.name and ("Save " .. (G.slot or 1) .. ": " .. g.name) or nil)
-  local i = sel("settings", 8)
-  local rows = { "Save game", "Idle fishing: " .. (g.idle and "on" or "off"), VOLS[1].name, VOLS[2].name,
-                 VOLS[3].name, VOLS[4].name, "Controls  >", "Save and quit" }
+  if s.sub == "exit" then
+    -- Save and exit: everything that leaves the water in one place
+    local i = sel("settingsexit", 3)
+    local rows = { "Save now", "Exit to title", "Quit game" }
+    local notes = { "Your progress is also saved as you play.",
+                    "Saves, then back to the title to pick a save.",
+                    "Saves and closes the game. See you on the water." }
+    for k, r in ipairs(rows) do
+      local y = PY0 + 30 + (k - 1) * 22
+      rowBox(y, 20, k == i)
+      UI.text(r, PX0 + 4, y + 3, INK, 2)
+    end
+    wrap(notes[i], PX0, PY1 - 20, INK_L, PX1 - PX0)
+    return
+  end
+  local i = sel("settings", 7)
+  local rows = { "Idle fishing: " .. (g.idle and "on" or "off"), VOLS[1].name, VOLS[2].name,
+                 VOLS[3].name, VOLS[4].name, "Controls  >", "Save and exit  >" }
   for k, r in ipairs(rows) do
     local y = PY0 + 24 + (k - 1) * 15
     rowBox(y, 14, k == i)
     UI.text(r, PX0 + 4, y + 1, INK, 2)
-    local vk = VOLS[k - 2]
+    local vk = VOLS[k - 1]
     if vk then
       -- a level meter of ten steps
       local v = g.vol[vk.key]
@@ -611,14 +631,13 @@ local function pageSettings(t)
     end
   end
   local notes = {
-    "Your progress is also saved as you play.",
     "When idle, you fish on your own and sell when the cooler is full.",
     "How loud everything is.",
     "Quiet tunes for each place, shuffled, calmer at night.",
     "The reel, splashes, bites, your boat and your pet.",
     "Birds, wind, water, rain and crickets around you.",
-    "Change which buttons cast, reel fast, pet, open the box and run the motor.",
-    "See you on the water.",
+    "Choose which button does what.",
+    "Save, change saves, or quit.",
   }
   local played = math.floor((g.playTime or 0) / 60)
   UI.text("Fish caught: " .. (g.stats.catches or 0) .. "    Time on the water: " .. played .. " min", PX0, PY1 - 36, INK_G, 2)
