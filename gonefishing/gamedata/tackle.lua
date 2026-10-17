@@ -613,7 +613,7 @@ local function pageSettings(t)
   local notes = {
     "Your progress is also saved as you play.",
     "When idle, you fish on your own and sell when the cooler is full.",
-    "How loud everything is. Left and right change it.",
+    "How loud everything is.",
     "Quiet tunes for each place, shuffled, calmer at night.",
     "The reel, splashes, bites, your boat and your pet.",
     "Birds, wind, water, rain and crickets around you.",
@@ -622,6 +622,7 @@ local function pageSettings(t)
   }
   local played = math.floor((g.playTime or 0) / 60)
   UI.text("Fish caught: " .. (g.stats.catches or 0) .. "    Time on the water: " .. played .. " min", PX0, PY1 - 36, INK_G, 2)
+  UI.text("v" .. G.VERSION, PX1, PY1 - 36, INK_L, 2, "right")
   wrap(notes[i], PX0, PY1 - 20, INK_L, PX1 - PX0)
 end
 

@@ -16,6 +16,7 @@ local W, H, CUT_Y, WORLD_W = U.W, U.H, U.CUT_Y, U.WORLD_W
 local fl, rr, rnd, lerp, clamp, mix, setc, wander, sign = U.fl, U.rr, U.rnd, U.lerp, U.clamp, U.mix, U.setc, U.wander, U.sign
 
 local args = {}
+G.VERSION = "1.1"
 local canvas, scale, offX, offY = nil, 1, 0, 0
 local game, st
 
@@ -91,13 +92,18 @@ local padmap = {
 }
 local lastInput = 0
 function love.keypressed(k) if keymap[k] then pressed[keymap[k]] = true; lastInput = 0 end end
-function love.gamepadpressed(_, b) if padmap[b] then pressed[padmap[b]] = true; lastInput = 0 end end
+-- Under PortMaster (launched with --fullscreen) the buttons come in only as keys from gptokeyb, which follows each
+-- device's printed button labels. Reading the controller directly as well would double every press, and SDL names
+-- buttons by position, so on Nintendo-style layouts A and B would be swapped. Direct controller input is for
+-- running on a computer (or pass --gamepad to force it on).
+local function padOn() return not args.fullscreen or args.gamepad end
+function love.gamepadpressed(_, b) if padOn() and padmap[b] then pressed[padmap[b]] = true; lastInput = 0 end end
 
 local testHold = {}
 local function isDown(action)
   if testHold[action] then return true end
   for k, a in pairs(keymap) do if a == action and love.keyboard.isDown(k) then return true end end
-  for _, j in ipairs(love.joystick.getJoysticks()) do
+  for _, j in ipairs(padOn() and love.joystick.getJoysticks() or {}) do
     if j:isGamepad() then
       for b, a in pairs(padmap) do if a == action and j:isGamepadDown(b) then return true end end
       local ax = j:getGamepadAxis("leftx")
@@ -1698,6 +1704,7 @@ local function drawTitle()
   if t > 1.2 and (t % 1.4) < 1.0 and not args.covers then
     UI.text("Press A", W / 2, 150, { 1, 1, 1, 0.9 }, 2, "center", { 0, 0, 0, 0.5 })
   end
+  if not args.covers then UI.text("v" .. G.VERSION, W - 6, H - 14, { 1, 1, 1, 0.55 * a }, 2, "right", { 0, 0, 0, 0.35 * a }) end
 end
 
 ---------------------------------------------------------------- render
@@ -1751,6 +1758,7 @@ local runTest
 function love.load(a)
   for _, v in ipairs(a or {}) do
     if v == "--fullscreen" then args.fullscreen = true end
+    if v == "--gamepad" then args.gamepad = true end
     if v == "--test" then args.test = true end
     local sw, sh = v:match("^%-%-size=(%d+)x(%d+)$")
     if sw then args.size = { tonumber(sw), tonumber(sh) } end

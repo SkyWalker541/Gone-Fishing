@@ -24,7 +24,7 @@
 
 > **Updates:** Gone Fishing is still being worked on, and improvements and new features may be released.
 > Check back here or on the [Releases page](https://github.com/SkyWalker541/Gone-Fishing/releases) now and then for updates.
-> Updating keeps your saves; see [Updating](#updating).
+> Updating keeps your saves; see [Updating](#updating). Current version: **v1.1**, see [what's new](CHANGELOG.md).
 
 <p align="center">
   <img src="images/gameplay.gif" alt="Casting, a bite and the fight" width="512">
