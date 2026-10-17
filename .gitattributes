@@ -1,0 +1,10 @@
+# keep shell scripts and Lua with Unix line endings so they run on the handheld
+*.sh   text eol=lf
+*.lua  text eol=lf
+*.gptk text eol=lf
+*.json text eol=lf
+*.png  binary
+*.jpg  binary
+*.gif  binary
+*.ogg  binary
+*.mp4  binary

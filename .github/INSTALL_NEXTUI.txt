@@ -1,0 +1,76 @@
+GONE FISHING - MANUAL INSTALL WITH PORTMASTER ON NEXTUI (TrimUI Brick)
+======================================================================
+
+By SkyWalker541 - https://github.com/SkyWalker541/Gone-Fishing
+
+You need:
+  - Your SD card and a computer
+  - gonefishing.zip from the latest release:
+    https://github.com/SkyWalker541/Gone-Fishing/releases/latest
+
+
+1. INSTALL PORTMASTER (skip this if you already have it)
+   - On the Brick, open the Pak Store and install PortMaster ("PORTS").
+   - Or by hand: download PORTS.pakz from github.com/ben16w/minui-portmaster,
+     copy it to the root of the SD card, then eject the card and restart the
+     Brick. NextUI installs it by itself.
+   - Open "Ports" once on the Brick so PortMaster can finish setting up.
+
+2. UNZIP THE GAME ON YOUR COMPUTER
+   Unzip gonefishing.zip. You get two things:
+     Gone Fishing.sh     (the launcher)
+     gonefishing         (a folder with the game inside)
+
+3. COPY THEM TO THE SD CARD
+   Put the SD card in your computer and copy:
+
+     Gone Fishing.sh  ->  /Roms/Ports (PORTS)/
+     gonefishing      ->  /Roms/Ports (PORTS)/.ports/
+
+   So you end up with:
+     /Roms/Ports (PORTS)/Gone Fishing.sh
+     /Roms/Ports (PORTS)/.ports/gonefishing/gamedata/main.lua   (and the rest)
+
+   Note: ".ports" starts with a dot, so it is a hidden folder.
+     - Mac: in Finder press Cmd + Shift + . (period) to show hidden folders.
+     - Windows: in File Explorer, View > Show > Hidden items.
+   If the .ports folder isn't there yet, create it.
+
+4. PLAY
+   Eject the SD card, put it back in the Brick, open Ports, and pick
+   "Gone Fishing".
+
+   Saves are kept in the gonefishing/saves folder.
+
+
+CONTROLS
+  D-pad Left/Right  Row the boat (or drive with a trolling motor)
+  A                 Hold to cast, hold to reel, press to strike
+  Down / Up         Let line out / reel in
+  B                 Reel fast / release a catch / back
+  X                 Pet your dog or cat
+  Y                 Trolling menu (needs the Auto Trolling Motor)
+  Start             Tackle box (shop, gear, look, map, settings...)
+  L / R             Change tackle box sections
+
+  You can remap A, B, X, Y and Start in Settings > Controls.
+
+
+UPDATING
+  Copy the new "Gone Fishing.sh" and "gonefishing" folder over the old ones.
+  Keep the gonefishing/saves folder so you don't lose your progress.
+
+IF IT DOESN'T SHOW UP OR START
+  - Check that the folder names match exactly, including "Ports (PORTS)"
+    and ".ports".
+  - Make sure you copied the "gonefishing" folder itself, not just what's
+    inside it.
+  - The PortMaster log is in /.userdata/tg5040/logs/PORTS.txt
+
+UPDATES
+  Improvements may be released. Check back for updates at:
+  https://github.com/SkyWalker541/Gone-Fishing/releases
+
+LICENSE
+  Free to download and share, but it may not be sold or charged for, and
+  modified versions may not be shared (CC BY-NC-ND 4.0).

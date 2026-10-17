@@ -1,0 +1,214 @@
+<p align="center">
+  <img src="images/cover.png" alt="Gone Fishing" width="640">
+</p>
+
+<h1 align="center">Gone Fishing</h1>
+
+<p align="center">
+  By <a href="https://github.com/SkyWalker541">SkyWalker541</a><br>
+  A free, quiet pixel-art fishing game for retro handhelds, made with LÖVE.<br>
+  Built for the <b>TrimUI Brick</b> on <b>NextUI</b> with <b>PortMaster</b>, and it runs on any computer with LÖVE 11.5.
+</p>
+
+<p align="center">
+  <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="License: CC BY-NC-ND 4.0" src="https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/SkyWalker541/Gone-Fishing/releases/latest"><b>Download the latest release</b></a> ·
+  <a href="#install-on-nextui-trimui-brick">Install</a> ·
+  <a href="#controls">Controls</a> ·
+  <a href="media/trailer.mp4">Watch the trailer</a>
+</p>
+
+> **Updates:** Gone Fishing is still being worked on, and improvements and new features may be released.
+> Check back here or on the [Releases page](https://github.com/SkyWalker541/Gone-Fishing/releases) now and then for updates.
+> Updating keeps your saves; see [Updating](#updating).
+
+<p align="center">
+  <img src="images/gameplay.gif" alt="Casting, a bite and the fight" width="512">
+</p>
+
+---
+
+## About the game
+
+Row out onto the water, look down at the fish swimming under your boat, and put your lure where they are. Let line out
+to sink deeper, reel to bring it up, and strike when one bites. Every fish fights in its own way, so ease off when it pulls
+or the line will snap. Sell your catch, upgrade your gear, dress up your angler and bring a dog or a cat along.
+
+There's no timer and no pressure. Leave it on **idle fishing** and it fishes on its own.
+
+### Features
+
+- **Five places**, each eight screens long, with the scenery changing as you travel:
+  - **Pine Lake**: an autumn lake under snowy peaks.
+  - **Willow River**: a summer river with stony runs and a current that carries your line.
+  - **Driftwood Bay**: an ocean bay with a lighthouse and big fish.
+  - **Frost Lake**: a winter lake with ice floes and the northern lights.
+  - **Columbia River** at Hood River, Oregon: Mt. Hood drawn from survey data, the Hood River Bridge with its lift span, kiteboarders on the wind, and the river's real fish.
+- **42 fish** with their own behaviour and fight, including smallmouth bass, walleye, steelhead, chinook and coho salmon, and white sturgeon. **Five legends** each take only one lure.
+- **Ten lures** that act differently in the water: worms, spinners, jigs, diving cranks, topwater poppers, spoons, a glow jig, stink bait, a dry fly and a trolling plug.
+- **Real fishing feel:** rods with reels, a clicking drag when a fish takes line, line that sags and drifts in the current, and nibbles before the bite.
+- **Boats and trolling motors:**
+  - Row the wooden rowboat, or buy a skiff or a workboat.
+  - Fit a **Trolling Motor** to steer by hand.
+  - The **Auto Trolling Motor** can also troll on its own while you fish, with a speed setting.
+- **Day and night, weather and seasons:** sunrises, storms, fog, snow, fireflies and moonlight on the water.
+- **A tackle box** with:
+  - A cooler.
+  - A shop.
+  - Gear.
+  - Goals and daily tasks.
+  - A logbook of every species.
+  - A map.
+  - A look editor.
+  - Settings.
+- **Your angler, your way:**
+  - Build, skin tone, eye color.
+  - 14 hairstyles and facial hair.
+  - 11 hats, glasses, tops, vests, neckwear, pants and boots.
+  - A retriever, spitz, shorthair or longhair cat as a companion.
+  - The preview zooms in on whatever you're changing.
+- **Sound:** recorded ambience for each place, a shuffled soundtrack, and separate volume levels for music, sound effects and nature sounds.
+
+## Screenshots
+
+| | |
+|:--:|:--:|
+| ![Pine Lake](images/lake_day.png) | ![Fishing at Pine Lake](images/fishing.png) |
+| Pine Lake | Watching the fish below the boat |
+| ![The fight](images/fight.png) | ![A catch](images/catch.png) |
+| The fight | A new species |
+| ![Columbia River and Mt. Hood](images/columbia_mt_hood.png) | ![The Hood River Bridge](images/columbia_bridge.png) |
+| The Columbia River and Mt. Hood | The Hood River Bridge |
+| ![Bridge at sunset](images/columbia_sunset.png) | ![Trolling](images/trolling.png) |
+| Sunset on the Columbia | Trolling a lure behind the boat |
+| ![Willow River in the rain](images/river_rain.png) | ![Driftwood Bay at sunset](images/coast_sunset.png) |
+| Willow River in the rain | Driftwood Bay at sunset |
+| ![Frost Lake at night](images/frost_night.png) | ![Frost Lake](images/frost_cabin.png) |
+| Northern lights over Frost Lake | Frost Lake |
+| ![The shop](images/shop.png) | ![Look](images/look.png) |
+| The shop | Dressing up your angler |
+| ![Map](images/map.png) | ![Trolling motor menu](images/trolling_menu.png) |
+| Travel between places | The trolling motor menu |
+
+## Install on NextUI (TrimUI Brick)
+
+You need PortMaster on the Brick and `gonefishing.zip` from the [latest release](https://github.com/SkyWalker541/Gone-Fishing/releases/latest).
+
+1. **Install PortMaster** if you don't have it. On the Brick, open the **Pak Store** and install **PortMaster** (listed as "PORTS"). Then open **Ports** once so it can finish setting up.
+2. **Unzip `gonefishing.zip`** on your computer. You get:
+   - `Gone Fishing.sh` (the launcher)
+   - `gonefishing/` (the game folder)
+3. **Copy them to the SD card:**
+
+   | Copy | To |
+   |--|--|
+   | `Gone Fishing.sh` | `/Roms/Ports (PORTS)/` |
+   | `gonefishing/` | `/Roms/Ports (PORTS)/.ports/` |
+
+   `.ports` is a hidden folder. Show hidden files with **Cmd + Shift + .** on a Mac, or **View > Show > Hidden items** on Windows. Create the folder if it isn't there yet.
+4. **Play:** put the card back in the Brick, open **Ports** and pick **Gone Fishing**.
+
+When you're done, the SD card should look like this:
+```
+Roms/
+└── Ports (PORTS)/
+    ├── Gone Fishing.sh
+    └── .ports/
+        └── gonefishing/
+            ├── gamedata/
+            ├── gonefishing.gptk
+            ├── licenses/
+            └── saves/        (created the first time you play)
+```
+
+Plain-text instructions are also in [INSTALL_NEXTUI.txt](INSTALL_NEXTUI.txt).
+
+### Other PortMaster devices
+
+The port follows the standard PortMaster layout (LÖVE 11.5 runtime, aarch64 and x86_64). On other PortMaster systems, copy
+`Gone Fishing.sh` and the `gonefishing/` folder into your usual ports folder.
+
+### On a computer
+
+Install [LÖVE 11.5](https://love2d.org/) and run the `gamedata` folder:
+
+```sh
+love gonefishing/gamedata
+```
+
+Keyboard: arrows move, **Z** casts and reels, **X** reels fast and goes back, **C** pets, **V** opens the trolling menu,
+**Enter** opens the tackle box, **Q / E** switch sections. Add `--size=WxH` to try other screen sizes.
+
+## Controls
+
+| Button | Action |
+|--|--|
+| D-pad Left / Right | Row the boat, or drive with a trolling motor |
+| A | Hold to cast, hold to reel, press to strike |
+| Down / Up | Let line out / reel in |
+| B | Reel fast / release a catch / back |
+| X | Pet your dog or cat |
+| Y | Trolling motor menu: on/off and speed (needs the Auto Trolling Motor) |
+| Start | Open the tackle box |
+| L / R | Tackle box sections |
+
+A, B, X, Y and Start can be remapped in **Settings > Controls**.
+
+## Updating
+
+New versions are posted on the [Releases page](https://github.com/SkyWalker541/Gone-Fishing/releases). To update, copy the new `Gone Fishing.sh` and
+`gonefishing/` folder over the old ones. Your progress is kept in `gonefishing/saves/`, so leave that folder in place.
+
+## Repository layout
+
+This repository is laid out as a PortMaster port, so it can be installed directly or submitted to PortMaster as-is:
+
+```
+Gone Fishing.sh       the PortMaster launcher
+port.json             PortMaster port info
+gameinfo.xml          game list entry (name, description, cover)
+README.md             PortMaster notes and controls
+cover.jpg             cover art (640x480)
+screenshot.jpg        screenshot (640x480)
+gonefishing/
+├── gamedata/         the game itself (LÖVE 11.5, Lua source, graphics, sounds, music)
+├── gonefishing.gptk  button map
+└── licenses/         license files
+.github/              this page, screenshots and the trailer (not part of the port)
+```
+
+### Making the release zip
+
+The release zip has the launcher and the `gonefishing/` folder, with the port files inside it:
+
+```sh
+mkdir -p stage/gonefishing
+cp "Gone Fishing.sh" stage/
+cp -r gonefishing/. stage/gonefishing/
+cp port.json gameinfo.xml README.md cover.jpg screenshot.jpg stage/gonefishing/
+(cd stage && zip -r ../gonefishing.zip .)
+```
+
+Attach `gonefishing.zip` to a new release on GitHub.
+
+### Running on a computer
+
+```sh
+love gonefishing/gamedata            # play
+love gonefishing/gamedata --test     # headless self-test with screenshots
+```
+
+## Credits and license
+
+- Gone Fishing is © 2026 SkyWalker541 and licensed under [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/):
+  free to download and share, but it may not be sold or charged for, and modified versions may not be shared.
+  See [LICENSE](../gonefishing/licenses/LICENSE.gonefishing.txt) for details, including permission for PortMaster packaging.
+- Made by [SkyWalker541](https://github.com/SkyWalker541). All sounds and music were made by SkyWalker541 with AI tools and in code.
+- Third-party licenses (LÖVE, gptokeyb): [gonefishing/licenses](../gonefishing/licenses).
+- Thanks to the [LÖVE](https://love2d.org/) team and [PortMaster](https://portmaster.games/).
+
+All characters, names and places are original, except the real Columbia River, Hood River, Mt. Hood and the
+Hood River Bridge, drawn as a tribute to the Columbia River Gorge.
