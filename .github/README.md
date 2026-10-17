@@ -24,7 +24,7 @@
 
 > **Updates:** Gone Fishing is still being worked on, and improvements and new features may be released.
 > Check back here or on the [Releases page](https://github.com/SkyWalker541/Gone-Fishing/releases) now and then for updates.
-> Updating keeps your saves; see [Updating](#updating). Current version: **v1.1**, see [what's new](CHANGELOG.md).
+> Updating keeps your saves; see [Updating](#updating). Current version: **v1.2**, see [what's new](CHANGELOG.md).
 
 <p align="center">
   <img src="images/gameplay.gif" alt="Casting, a bite and the fight" width="512">
@@ -71,6 +71,7 @@ There's no timer and no pressure. Leave it on **idle fishing** and it fishes on 
   - 11 hats, glasses, tops, vests, neckwear, pants and boots.
   - A retriever, spitz, shorthair or longhair cat as a companion.
   - The preview zooms in on whatever you're changing.
+- **Three save slots**, each with its own name typed on an on-screen keyboard, plus safe deleting with a double confirmation.
 - **Sound:** recorded ambience for each place, a shuffled soundtrack, and separate volume levels for music, sound effects and nature sounds.
 
 ## Screenshots
@@ -167,7 +168,7 @@ A, B, X, Y and Start can be remapped in **Settings > Controls**.
 ## Updating
 
 New versions are posted on the [Releases page](https://github.com/SkyWalker541/Gone-Fishing/releases). To update, copy the new `Gone Fishing.sh` and
-`gonefishing/` folder over the old ones. Your progress is kept in `gonefishing/saves/`, so leave that folder in place.
+`gonefishing/` folder over the old ones. Your progress, all three save slots, is kept in `gonefishing/saves/`, so leave that folder in place.
 
 ## Repository layout
 

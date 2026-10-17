@@ -587,7 +587,7 @@ local function pageSettings(t)
          PX0, PY1 - 32, INK_L, PX1 - PX0)
     return
   end
-  header("Settings")
+  header("Settings", g.name and ("Save " .. (G.slot or 1) .. ": " .. g.name) or nil)
   local i = sel("settings", 8)
   local rows = { "Save game", "Idle fishing: " .. (g.idle and "on" or "off"), VOLS[1].name, VOLS[2].name,
                  VOLS[3].name, VOLS[4].name, "Controls  >", "Save and quit" }

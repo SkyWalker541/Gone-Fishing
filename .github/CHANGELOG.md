@@ -1,5 +1,13 @@
 # Gone Fishing: what's new
 
+## v1.2
+- **Three save slots.** After pressing A on the title screen, choose a save. Start a new game in an empty slot and
+  name your angler with the on-screen keyboard.
+- **Delete a save** with X on the save screen. It asks twice before anything is deleted, and the second question starts
+  on "No, keep it".
+- Your existing save moves into slot 1 automatically. Nothing is lost.
+- The Settings page shows which save you're playing.
+
 ## v1.1
 - **Fixed:** A and B were swapped. A now casts, reels and strikes, and B reels fast and goes back, matching the
   labels printed on your handheld. The button map was corrected, and under PortMaster the game now reads buttons only

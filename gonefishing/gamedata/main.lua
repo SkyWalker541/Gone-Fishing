@@ -16,7 +16,7 @@ local W, H, CUT_Y, WORLD_W = U.W, U.H, U.CUT_Y, U.WORLD_W
 local fl, rr, rnd, lerp, clamp, mix, setc, wander, sign = U.fl, U.rr, U.rnd, U.lerp, U.clamp, U.mix, U.setc, U.wander, U.sign
 
 local args = {}
-G.VERSION = "1.1"
+G.VERSION = "1.2"
 local canvas, scale, offX, offY = nil, 1, 0, 0
 local game, st
 
@@ -47,16 +47,39 @@ local function ser(v)
   return "nil"
 end
 
+-- three save slots: save1.lua .. save3.lua, plus slot.txt remembering the last one played
+G.slot = nil                       -- the slot being played (nil on the title screen, before one is picked)
+local function slotFile(i) return "save" .. i .. ".lua" end
+
 local function saveGame()
-  if args.test or not game then return true end
+  if (args.test and not args.slottest) or not game or not G.slot then return true end
   if st and st.boat then game.boatX, game.face = st.boat.x, st.boat.face end
-  return love.filesystem.write("save.lua", "return " .. ser(game))
+  return love.filesystem.write(slotFile(G.slot), "return " .. ser(game))
 end
 
-local function loadGame()
+-- read a save file into a table, or nil
+local function readSave(path)
+  if not love.filesystem.getInfo(path) then return nil end
+  local ok, chunk = pcall(love.filesystem.load, path)
+  if not (ok and chunk) then return nil end
+  local ok2, data = pcall(chunk)
+  if ok2 and type(data) == "table" then return data end
+  return nil
+end
+
+-- saves from before slots existed become slot 1
+local function migrateSlots()
+  if love.filesystem.getInfo("save.lua") and not love.filesystem.getInfo(slotFile(1)) then
+    local data = love.filesystem.read("save.lua")
+    if data and love.filesystem.write(slotFile(1), data) then love.filesystem.remove("save.lua") end
+  end
+end
+
+local function loadGame(slot)
   local g = defaults()
-  if love.filesystem.getInfo("save.lua") then
-    local ok, chunk = pcall(love.filesystem.load, "save.lua")
+  local path = slotFile(slot or 1)
+  if love.filesystem.getInfo(path) then
+    local ok, chunk = pcall(love.filesystem.load, path)
     if ok and chunk then
       local ok2, data = pcall(chunk)
       if ok2 and type(data) == "table" then
@@ -858,6 +881,192 @@ local function idleBrain(dt)
 end
 
 ---------------------------------------------------------------- update
+
+---------------------------------------------------------------- save slots
+-- After A on the title screen: pick one of three slots. An empty slot asks for a name on an on-screen keyboard
+-- and starts a new game; X on a used slot deletes it, after two confirmations.
+local KEYS = { "ABCDEFGHIJ", "KLMNOPQRST", "UVWXYZ0123", "456789 -.'" }
+local NAME_MAX = 10
+
+local function slotInfo(i)
+  local d = readSave(slotFile(i))
+  if not d then return nil end
+  local caught = (d.stats and d.stats.catches) or d.catches or 0
+  return { name = d.name or ("Angler " .. i), coins = d.coins or 0, loc = d.loc or "lake", caught = caught,
+           mins = math.floor((d.playTime or 0) / 60) }
+end
+
+local function openSlots()
+  local info = {}
+  for i = 1, 3 do info[i] = slotInfo(i) or false end
+  st.slots = { sel = G.lastSlot or 1, mode = "list", info = info }
+  play("blip")
+end
+
+-- load (or create) a slot and start playing it
+local function startSlot(i, newName)
+  if newName then
+    game = defaults()
+    game.name = newName
+    game.vol = { master = 10, music = 10, sfx = 10, amb = 10 }
+    GR.migrate(game); GR.sync(game); GO.init(game)
+  elseif i ~= G.lastSlot or not st.slots.info[i] then
+    game = loadGame(i)
+  end
+  G.game, G.slot, G.lastSlot = game, i, i
+  love.filesystem.write("slot.txt", tostring(i))
+  if newName or i ~= (st.slots.backdrop or G.lastSlot) then
+    local t = st.titleT
+    st = newState()
+    st.titleT = t
+    G.cam.x = clamp(st.boat.x - W / 2, 0, WORLD_W - W)
+    enterPlace(game.loc)
+  end
+  applyVolume()
+  saveGame()
+  st.slots = nil
+  st.fade = { t = 0, dir = 1, start = true }
+  play("latch")
+end
+
+local function slotMenuUpdate()
+  local m = st.slots
+  if m.mode == "list" then
+    if pressed.up then m.sel = (m.sel - 2) % 3 + 1; play("blip") end
+    if pressed.down then m.sel = m.sel % 3 + 1; play("blip") end
+    if pressed.a or pressed.start then
+      if m.info[m.sel] then
+        m.backdrop = G.lastSlot
+        startSlot(m.sel)
+      else
+        m.mode, m.name, m.kx, m.ky = "name", "", 1, 1
+        play("click")
+      end
+    elseif pressed.x and m.info[m.sel] then
+      m.mode, m.confirm = "del1", 1
+      play("nope")
+    elseif pressed.b then
+      st.slots = nil; play("blip")
+    end
+  elseif m.mode == "name" then
+    -- the keyboard: four rows of characters and a row of SPACE / DELETE / DONE
+    local rows = #KEYS + 1
+    if pressed.up then m.ky = (m.ky - 2) % rows + 1; play("blip") end
+    if pressed.down then m.ky = m.ky % rows + 1; play("blip") end
+    local cols = m.ky <= #KEYS and #KEYS[m.ky] or 3
+    if m.ky > #KEYS then m.kx = math.min(m.kx, 3) end
+    if pressed.left then m.kx = (m.kx - 2) % cols + 1; play("blip") end
+    if pressed.right then m.kx = m.kx % cols + 1; play("blip") end
+    m.kx = math.min(m.kx, cols)
+    local function done()
+      local nm = m.name:gsub("^%s+", ""):gsub("%s+$", "")
+      if nm == "" then play("nope"); return end
+      m.backdrop = G.lastSlot
+      startSlot(m.sel, nm)
+    end
+    if pressed.a then
+      if m.ky <= #KEYS then
+        if #m.name < NAME_MAX then m.name = m.name .. KEYS[m.ky]:sub(m.kx, m.kx); play("click") else play("nope") end
+      elseif m.kx == 1 then
+        if #m.name < NAME_MAX and #m.name > 0 then m.name = m.name .. " "; play("click") end
+      elseif m.kx == 2 then
+        m.name = m.name:sub(1, -2); play("blip")
+      else
+        done()
+      end
+    elseif pressed.start then
+      done()
+    elseif pressed.b then
+      if #m.name > 0 then m.name = m.name:sub(1, -2); play("blip") else m.mode = "list"; play("blip") end
+    end
+  elseif m.mode == "del1" or m.mode == "del2" then
+    -- two confirmations; the second one starts on "Keep" so a double press can't delete by accident
+    if pressed.up or pressed.down then m.confirm = 3 - m.confirm; play("blip") end
+    if pressed.b then m.mode = "list"; play("blip")
+    elseif pressed.a then
+      if m.confirm == 2 then m.mode = "list"; play("blip")
+      elseif m.mode == "del1" then m.mode, m.confirm = "del2", 2; play("nope")
+      else
+        love.filesystem.remove(slotFile(m.sel))
+        m.info[m.sel] = false
+        m.mode = "list"
+        play("splash")
+      end
+    end
+  end
+  pressed = {}
+end
+
+G.drawSlots = function()
+  local m = st.slots
+  local pw, ph = 300, 178
+  local x, y = fl(W / 2 - pw / 2), 58
+  local INK, INKL, GREEN = { 0.25, 0.18, 0.12 }, { 0.48, 0.40, 0.30 }, { 0.16, 0.38, 0.26 }
+  lg.setColor(0.06, 0.08, 0.10, 0.6); lg.rectangle("fill", x + 3, y + 4, pw, ph, 8, 8)
+  lg.setColor(0.13, 0.28, 0.21); lg.rectangle("fill", x - 2, y - 2, pw + 4, ph + 4, 9, 9)
+  lg.setColor(0.90, 0.86, 0.74); lg.rectangle("fill", x + 2, y + 2, pw - 4, ph - 4, 6, 6)
+  local function sel(rx, ry, rw, rh) lg.setColor(0.95, 0.80, 0.42, 0.75); lg.rectangle("fill", rx, ry, rw, rh, 3, 3) end
+  if m.mode == "list" then
+    UI.text("Choose a save", W / 2, y + 8, GREEN, 2, "center")
+    for i = 1, 3 do
+      local ry = y + 24 + (i - 1) * 40
+      if i == m.sel then sel(x + 8, ry - 2, pw - 16, 38) end
+      lg.setColor(0.80, 0.75, 0.62); lg.rectangle("line", x + 8.5, ry - 1.5, pw - 17, 37, 3, 3)
+      local inf = m.info[i]
+      UI.text(tostring(i), x + 18, ry + 10, INKL, 3)
+      if inf then
+        UI.text(inf.name, x + 40, ry + 3, INK, 2)
+        UI.text((Wd.byId[inf.loc] and Wd.byId[inf.loc].name or ""), x + 40, ry + 18, INKL, 2)
+        UI.coin(x + pw - 92, ry + 4)
+        UI.text(inf.coins, x + pw - 80, ry + 3, INK, 2)
+        UI.text(inf.caught .. " fish  " .. inf.mins .. " min", x + pw - 16, ry + 18, INKL, 2, "right")
+      else
+        UI.text("Empty - new game", x + 40, ry + 10, INKL, 2)
+      end
+    end
+    local hints = { { "A", m.info[m.sel] and "Play" or "New game" }, { "B", "Back" } }
+    if m.info[m.sel] then hints[#hints + 1] = { "X", "Delete" } end
+    UI.hints(hints, W / 2, y + ph - 16, INK, "center")
+  elseif m.mode == "name" then
+    UI.text("Name for save " .. m.sel, W / 2, y + 8, GREEN, 2, "center")
+    lg.setColor(0.98, 0.96, 0.90); lg.rectangle("fill", x + 60, y + 22, pw - 120, 16, 3, 3)
+    local cur = (math.floor(st.titleT * 2) % 2 == 0) and "_" or " "
+    UI.text(m.name .. (#m.name < NAME_MAX and cur or ""), W / 2, y + 26, INK, 2, "center")
+    for r, row in ipairs(KEYS) do
+      for c = 1, #row do
+        local kx, ky = x + 30 + (c - 1) * 24, y + 46 + (r - 1) * 18
+        if r == m.ky and c == m.kx then sel(kx - 2, ky - 3, 20, 15) end
+        local ch = row:sub(c, c)
+        UI.text(ch == " " and "_" or ch, kx + 8, ky, ch == " " and INKL or INK, 2, "center")
+      end
+    end
+    local labels = { "Space", "Delete", "Done" }
+    for c = 1, 3 do
+      local kx, ky = x + 30 + (c - 1) * 80, y + 46 + #KEYS * 18 + 2
+      if m.ky == #KEYS + 1 and m.kx == c then sel(kx - 4, ky - 3, 72, 15) end
+      UI.text(labels[c], kx + 32, ky, c == 3 and GREEN or INK, 2, "center")
+    end
+    UI.hints({ { "A", "Type" }, { "B", "Erase" }, { "START", "Done" } }, W / 2, y + ph - 16, INK, "center")
+  else
+    local inf = m.info[m.sel]
+    local name = inf and inf.name or ""
+    if m.mode == "del1" then
+      UI.text("Delete save " .. m.sel .. "?", W / 2, y + 30, { 0.66, 0.22, 0.16 }, 3, "center")
+      UI.text(name, W / 2, y + 58, INK, 2, "center")
+    else
+      UI.text("Are you sure?", W / 2, y + 30, { 0.66, 0.22, 0.16 }, 3, "center")
+      UI.text(name .. " will be gone for good.", W / 2, y + 58, INK, 2, "center")
+    end
+    local opts = { m.mode == "del1" and "Yes, delete" or "Delete forever", "No, keep it" }
+    for k = 1, 2 do
+      local ry = y + 84 + (k - 1) * 20
+      if k == m.confirm then sel(x + 70, ry - 3, pw - 140, 16) end
+      UI.text(opts[k], W / 2, ry, k == 1 and { 0.66, 0.22, 0.16 } or INK, 2, "center")
+    end
+    UI.hints({ { "A", "Choose" }, { "B", "Back" } }, W / 2, y + ph - 16, INK, "center")
+  end
+end
+
 local function update(dt)
   st.time = st.time + dt
   lastInput = lastInput + dt
@@ -897,9 +1106,15 @@ local function update(dt)
 
   if st.mode == "title" then
     st.titleT = st.titleT + dt
-    if (pressed.a or pressed.start) and not st.fade then
-      st.fade = { t = 0, dir = 1, start = true }
-      play("latch")
+    if st.slots then
+      slotMenuUpdate()
+    elseif (pressed.a or pressed.start) and not st.fade then
+      if args.test and not args.slottest then
+        st.fade = { t = 0, dir = 1, start = true }
+        play("latch")
+      else
+        openSlots()
+      end
     end
   end
 
@@ -1696,6 +1911,13 @@ end
 
 local function drawTitle()
   if st.mode ~= "title" then return end
+  if st.slots then
+    local t = st.titleT
+    local a = clamp(t / 1.2, 0, 1)
+    UI.text("Gone Fishing", W / 2, 22, { 1, 0.97, 0.88, a }, 5, "center", { 0.18, 0.12, 0.22, a })
+    G.drawSlots()
+    return
+  end
   local t = st.titleT
   local a = clamp(t / 1.2, 0, 1)
   local y = 70 + math.sin(t * 0.9) * 2
@@ -1765,6 +1987,7 @@ function love.load(a)
     if v == "--snap" then args.snap = 2.5 end
     if v == "--covers" then args.test, args.covers = true, true end
     if v == "--features" then args.test, args.features = true, true end
+    if v == "--slottest" then args.test, args.slottest = true, true end
     local sl, sc, sx = v:match("^%-%-scene=(%a+),([%d.]+),(%d+)$")
     if sl then args.test, args.scene = true, { sl, tonumber(sc), tonumber(sx) } end
     if v == "--video" then args.test, args.video = true, true end
@@ -1782,7 +2005,11 @@ function love.load(a)
   G.BOATS = love.filesystem.load("gfx/boat/boats.lua")()
   Audio.load()
   Audio.loadRecorded()
-  game = args.test and defaults() or loadGame()
+  if not args.test or args.slottest then migrateSlots() end
+  -- the title screen shows the place from the last slot played
+  local last = tonumber(love.filesystem.read("slot.txt") or "") or 1
+  G.lastSlot = clamp(last, 1, 3)
+  game = (args.test and not args.slottest) and defaults() or loadGame(G.lastSlot)
   if not game.vol then game.vol = { master = game.mute and 0 or 10, music = game.music == false and 0 or 10, sfx = 10, amb = 10 } end
   GR.migrate(game); GR.sync(game); GO.init(game)
   G.game = game
@@ -2058,6 +2285,23 @@ function runTest()
     G.cam.x = clamp(x + 70 - W / 2, 0, WORLD_W - W)
     sim(2)
     shot(string.format("scene_%s_%d_%d", l, math.floor(c * 100), x))
+    love.event.quit(); return
+  end
+  if args.slottest then
+    -- save slots: the old single save became slot 1; make a new game in slot 3, then delete slot 1
+    sim(1.5); pressed.a = true; sim(0.4); shot("v01_slots")
+    pressed.down = true; sim(0.1); pressed.down = true; sim(0.1); pressed.a = true; sim(0.3)
+    for _, k in ipairs({ "right", "right", "a", "down", "a", "down", "down", "right", "a" }) do pressed[k] = true; sim(0.12) end
+    shot("v02_keyboard")
+    pressed.start = true; sim(2.5); shot("v03_playing")
+    print("SLOT", G.slot, game.name, love.filesystem.getInfo("save3.lua") and "save3 written" or "no save3")
+    st = newState(); sim(1.5); pressed.a = true; sim(0.4); shot("v04_slots_again")
+    pressed.up = true; sim(0.1); pressed.up = true; sim(0.1)
+    pressed.x = true; sim(0.3); shot("v05_delete1")
+    pressed.a = true; sim(0.3); shot("v06_delete2")
+    pressed.a = true; sim(0.3); print("after A on Keep:", st.slots and st.slots.mode, love.filesystem.getInfo("save1.lua") and "save1 kept" or "save1 gone")
+    pressed.x = true; sim(0.1); pressed.a = true; sim(0.1); pressed.down = true; sim(0.1); pressed.a = true; sim(0.3)
+    shot("v07_deleted"); print("after delete:", love.filesystem.getInfo("save1.lua") and "save1 kept" or "save1 gone")
     love.event.quit(); return
   end
   if args.features then
