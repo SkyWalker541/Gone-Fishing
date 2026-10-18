@@ -24,7 +24,7 @@
 
 > **Updates:** Gone Fishing is still being worked on, and improvements and new features may be released.
 > Check back here or on the [Releases page](https://github.com/SkyWalker541/Gone-Fishing/releases) now and then for updates.
-> Updating keeps your saves; see [Updating](#updating). Current version: **v1.3**, see [what's new](CHANGELOG.md).
+> Updating keeps your saves; see [Updating](#updating). Current version: **v1.4**, see [what's new](CHANGELOG.md).
 
 <p align="center">
   <img src="images/gameplay.gif" alt="Casting, a bite and the fight" width="512">
@@ -49,13 +49,13 @@ There's no timer and no pressure. Leave it on **idle fishing** and it fishes on 
   - **Frost Lake**: a winter lake with ice floes and the northern lights.
   - **Columbia River** at Hood River, Oregon: Mt. Hood drawn from survey data, the Hood River Bridge with its lift span, kiteboarders on the wind, and the river's real fish.
 - **42 fish** with their own behaviour and fight, including smallmouth bass, walleye, steelhead, chinook and coho salmon, and white sturgeon. **Five legends** each take only one lure.
-- **Ten lures** that act differently in the water: worms, spinners, jigs, diving cranks, topwater poppers, spoons, a glow jig, stink bait, a dry fly and a trolling plug.
-- **Real fishing physics:** casts slowed by air drag and line off the spool (heavier lures fly farther), lures that sink on the slack and hold their depth, line you feed out or wind in to set the depth, a clicking drag when a fish takes line, and nibbles before the bite.
+- **Ten lures**, each fished its own way: worms and stink bait left still for fish to nibble or smell, spinners, spoons and diving cranks reeled for fish to chase, jigs dropped to the bottom and hopped, topwater poppers and a dry fly that fish rise to, a glow jig for the dark, and a trolling plug. The tackle box says how to fish each one and whether it works under a bobber.
+- **Real fishing physics:** casts slowed by air drag and line off the spool (heavier lures fly farther), lures that sink on the slack and hold their depth (jigs and bait drop to the bottom), line you feed out or wind in to set the depth, a clicking drag when a fish takes line, and nibbles before the bite.
 - **Bobbers:** fit a slip bobber to hang your bait at a set depth and watch it twitch and go under when a fish bites.
 - **Boats and trolling motors:**
   - Row the wooden rowboat, or buy a skiff or a workboat.
   - Fit a **Trolling Motor** to steer by hand.
-  - The **Auto Trolling Motor** can also troll on its own while you fish, with a speed setting.
+  - The **Auto Trolling Motor** can also troll on its own while you fish, with a speed setting: it backs the boat slowly away from your cast and tows the lure, and diving lures swim down to their depth.
 - **Day and night, weather and seasons:** sunrises, storms, fog, snow, fireflies and moonlight on the water.
 - **A tackle box** with:
   - A cooler.

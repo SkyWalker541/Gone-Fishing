@@ -1,5 +1,28 @@
 # Gone Fishing: what's new
 
+## v1.4
+- **Fixed: the bobber getting stuck at the boat.** Reeling a bobber in now brings the float steadily to just off the
+  bow, and the bait then rises up to it before the rig comes out of the water. It no longer stalls against the hull or
+  jumps the line up from the bottom all at once.
+- **Lures now do what they say:**
+  - **Jigs, the Glow Jig and Stink Bait drop to the bottom** after the cast.
+  - Every lure sinks at its own speed when you let line out.
+  - **Spinners, spoons, cranks and the trolling plug** need to be reeled or trolled. Fish chase them and hit them
+    hard, and they ignore one that just sits there.
+  - **Worms and Stink Bait** work best left still; fish nibble first, and a worm being dragged around puts them off.
+  - Fish smell **Stink Bait** from all around, more the longer it sits.
+  - Fish **rise from deep down** to take the **Popper** or the **Dry Fly**, with a splash. The popper chugs along in
+    short pops.
+  - The **Diving Crank** now dives deeper.
+  - Every fish still likes the lures it liked before. A worm now tempts most fish a little.
+- **Trolling tows your lure.** The Auto Trolling Motor now backs the boat slowly away from your cast, the way anglers
+  troll with an electric motor, so the line comes tight. The lure is towed behind the boat, and diving lures swim down
+  to their diving depth. Before, the boat drove toward its own lure.
+- **Bobber notes.** The tackle box now shows how well each lure works under a bobber. Worms and Stink Bait are great,
+  jigs work, and spinners, cranks, poppers, spoons, flies and plugs don't.
+- Fish caught near the boat come in just outside the hull.
+- Old saves keep working; nothing in your save changes.
+
 ## v1.3
 - **Realistic casting.** The rod flings the lure, and air drag and line peeling off the spool slow it in flight.
   Heavy, compact lures (jigs, spoons, plugs) cast farthest; light baits like a worm or a dry fly fall short. Thicker
