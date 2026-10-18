@@ -16,7 +16,7 @@ local W, H, CUT_Y, WORLD_W = U.W, U.H, U.CUT_Y, U.WORLD_W
 local fl, rr, rnd, lerp, clamp, mix, setc, wander, sign = U.fl, U.rr, U.rnd, U.lerp, U.clamp, U.mix, U.setc, U.wander, U.sign
 
 local args = {}
-G.VERSION = "1.2"
+G.VERSION = "1.3"
 local canvas, scale, offX, offY = nil, 1, 0, 0
 local game, st
 
@@ -114,21 +114,39 @@ local padmap = {
   dpup = "up", dpdown = "down", dpleft = "left", dpright = "right", leftshoulder = "l", rightshoulder = "r",
 }
 local lastInput = 0
-function love.keypressed(k) if keymap[k] then pressed[keymap[k]] = true; lastInput = 0 end end
+-- Button layout: some devices print A/B (and X/Y) the other way round. One device-wide setting swaps them right
+-- where buttons come in, so gameplay, menus and the keyboard all follow it. It lives in prefs.lua, outside the
+-- save slots (it's about the hardware, and it applies on the title screen before a save is loaded).
+G.prefs = { swapButtons = false }
+local SWAP = { a = "b", b = "a", x = "y", y = "x" }
+local function mapButton(b) if b and G.prefs.swapButtons and SWAP[b] then return SWAP[b] end return b end
+G.loadPrefs = function()
+  if args.test then return end
+  local ok, chunk = pcall(love.filesystem.load, "prefs.lua")
+  if ok and chunk then
+    local ok2, t = pcall(chunk)
+    if ok2 and type(t) == "table" then G.prefs.swapButtons = t.swapButtons == true end
+  end
+end
+G.savePrefs = function()
+  if args.test then return end
+  love.filesystem.write("prefs.lua", "return { swapButtons = " .. tostring(G.prefs.swapButtons == true) .. " }")
+end
+function love.keypressed(k) if keymap[k] then pressed[mapButton(keymap[k])] = true; lastInput = 0 end end
 -- Under PortMaster (launched with --fullscreen) the buttons come in only as keys from gptokeyb, which follows each
 -- device's printed button labels. Reading the controller directly as well would double every press, and SDL names
 -- buttons by position, so on Nintendo-style layouts A and B would be swapped. Direct controller input is for
 -- running on a computer (or pass --gamepad to force it on).
 local function padOn() return not args.fullscreen or args.gamepad end
-function love.gamepadpressed(_, b) if padOn() and padmap[b] then pressed[padmap[b]] = true; lastInput = 0 end end
+function love.gamepadpressed(_, b) if padOn() and padmap[b] then pressed[mapButton(padmap[b])] = true; lastInput = 0 end end
 
 local testHold = {}
 local function isDown(action)
   if testHold[action] then return true end
-  for k, a in pairs(keymap) do if a == action and love.keyboard.isDown(k) then return true end end
+  for k, a in pairs(keymap) do if mapButton(a) == action and love.keyboard.isDown(k) then return true end end
   for _, j in ipairs(padOn() and love.joystick.getJoysticks() or {}) do
     if j:isGamepad() then
-      for b, a in pairs(padmap) do if a == action and j:isGamepadDown(b) then return true end end
+      for b, a in pairs(padmap) do if mapButton(a) == action and j:isGamepadDown(b) then return true end end
       local ax = j:getGamepadAxis("leftx")
       if action == "left" and ax < -0.5 then return true end
       if action == "right" and ax > 0.5 then return true end
@@ -228,6 +246,9 @@ local function hasTroll() return GR.hasMotor(game) end
 local function trollDrive() return game.boat == "rowboat" and hasTroll() end
 local function coolerCap() return GR.COOLERS[game.equip.cooler].cap end
 local function curLure() return GR.LURE[game.equip.lure] or GR.LURE.worm end
+local function hasBobber() return GR.hasBobber(game) end
+local PX_PER_FT = 8                     -- depth readout: about 8 pixels to a foot
+local GRAV = 320                        -- gravity in pixels per second squared
 
 ---------------------------------------------------------------- geometry
 local function yawRad() return math.rad(st.boat.yaw.x) end
@@ -365,7 +386,8 @@ G.api = {
   item = function(kind, key)
     if kind == "rod" then return GR.RODS[key] elseif kind == "line" then return GR.LINES[key]
     elseif kind == "cooler" then return GR.COOLERS[key] elseif kind == "lure" then return GR.LURE[key]
-    elseif kind == "motor" then return GR.MOTORS[key] end
+    elseif kind == "motor" then return GR.MOTORS[key]
+    elseif kind == "bobber" then return GR.BOBBERS[key] end
     for _, b in ipairs(GR.BOATS) do if b.key == key then return b end end
   end,
   claim = function(kind, id)
@@ -429,6 +451,8 @@ end
 
 ---------------------------------------------------------------- fishing
 local function startCast(power)
+  -- always start from the lure hanging under the rod tip, whatever happened before
+  st.lure.state, st.lure.fly, st.biter, st.bob = "hang", nil, nil, nil
   st.phase = "throw"
   st.throwT = 0
   st.power = power
@@ -436,19 +460,29 @@ local function startCast(power)
 end
 
 local function releaseLure()
+  -- The cast, as physics: the rod flings the lure at a speed set by how hard you cast and how well the lure
+  -- loads the rod (a very light bait can't bend it, so it leaves slower). In the air the lure is slowed by drag
+  -- on its own shape (and a bobber's) and by line peeling off the spool and through the guides, so heavy,
+  -- compact lures carry farthest and light or bulky ones fall short. A better rod flings a little faster;
+  -- thicker line drags a little more.
   local tx, ty = rodTip()
   local dir = facingRight() and 1 or -1
-  local dist = 50 + st.power * 200
-  local target = clamp(st.boat.x + dir * dist, 16, WORLD_W - 16)
-  -- a real arc: launched up and out from the rod tip, falling under gravity onto the target
-  local T = 0.75 + st.power * 0.45
-  local g = 320
+  local L = curLure()
+  local m, area = L.oz or 0.25, L.area or 1
+  if hasBobber() then m, area = m + 0.15, area + 1.6 end
+  local p = st.power
+  local vt = 300 * (1 + 0.03 * ((game.rod or 1) - 1))
+  local load = math.min(1, (m / 0.15) ^ 0.35)
+  local v0 = vt * (0.18 + 0.82 * p) * load * (1 - 0.15 * m)
+  local ang = math.rad(15 + 25 * p)
   local x0, y0 = tx + dir * 2, ty - 2
   st.lure.state = "fly"
-  st.lure.fly = { vx = (target - x0) / T, vy = (CUT_Y - y0 - 0.5 * g * T * T) / T, g = g }
+  st.lure.fly = { vx = dir * v0 * math.cos(ang), vy = -v0 * math.sin(ang), m = m,
+                  kd = 0.0003 * area, kl = 0.015 * (1 + 0.18 * ((game.line or 1) - 1)), t = 0 }
   st.lure.x, st.lure.y = x0, y0
   st.phase = "line"
   st.lineOut = 3
+  st.bob = nil
   if st.rope then Rope.launch(st.rope, x0, y0, st.lure.fly.vx, st.lure.fly.vy) end
   play("cast")
 end
@@ -461,10 +495,12 @@ local function retrieve()
   st.biter = nil
   st.phase = "idle"
   st.lure.state = "hang"
+  st.bob = nil
   st.T = 0
 end
 
 local function loseFish(msg)
+  if args.idletest then print("  lost:", msg, st.phase, st.T) end
   local a = st.biter
   if a then
     a.hooked, a.controlled, a.airborne = false, false, false
@@ -498,6 +534,7 @@ local function landFish()
   st.biter = nil
   st.phase = "landed"
   st.lure.state = "hang"
+  st.bob = nil
   st.T = 0
   Wd.addSplash(a.x, CUT_Y, 14, 1.3)
   Wd.addRipple(a.x, CUT_Y, 22)
@@ -538,74 +575,160 @@ local function updateLine(dt, reel, letOut, fast)
   st.lettingOut = letOut
   local tx = rodTip()
   local ex, ey = tx + (facingRight() and 6 or -6), CUT_Y + 4
+  local L = curLure()
+  local bobbing = hasBobber()
+  local tipx, tipy = rodTip()
   if lu.state == "fly" then
+    -- in the air: drag on the lure (quadratic in speed) and on the line leaving the spool (linear)
     local fz = lu.fly
-    fz.vy = fz.vy + fz.g * dt
-    lu.x = lu.x + fz.vx * dt
-    lu.y = lu.y + fz.vy * dt
-    if fz.vy > 0 and lu.y >= CUT_Y then
+    local n = math.max(1, math.ceil(dt * 240))
+    local h = dt / n
+    for _ = 1, n do
+      local v = math.sqrt(fz.vx * fz.vx + fz.vy * fz.vy)
+      local k = (fz.kd * v + fz.kl) / fz.m
+      fz.vx = fz.vx - k * fz.vx * h
+      fz.vy = fz.vy + (GRAV - k * fz.vy) * h
+      lu.x, lu.y = lu.x + fz.vx * h, lu.y + fz.vy * h
+    end
+    fz.t = fz.t + dt
+    if lu.x < 16 or lu.x > WORLD_W - 16 then lu.x = clamp(lu.x, 16, WORLD_W - 16); fz.vx = 0 end
+    if (fz.vy > 0 and lu.y >= CUT_Y) or fz.t > 4 then
       lu.state, lu.y = "sink", CUT_Y + 3
-      Wd.addRipple(lu.x, CUT_Y, 12)
-      Wd.addSplash(lu.x, CUT_Y, 5, 0.6)
+      Wd.addRipple(lu.x, CUT_Y, bobbing and 14 or 12)
+      Wd.addSplash(lu.x, CUT_Y, bobbing and 6 or 5, 0.6)
       Wd.spook(lu.x, CUT_Y + 20, 22)
       play("plop", rr(0.9, 1.1))
       play("bail", rr(0.95, 1.05))
       st.interestT = 1.0
+      -- the bail snaps shut: whatever line is out stays out, plus the little slack the arc left on the water,
+      -- so the lure sinks freely for a moment before the line comes tight
+      local d = math.sqrt((lu.x - tipx) ^ 2 + (lu.y - tipy) ^ 2)
+      st.lineOut = d + (bobbing and 3 or (12 + d * 0.06))
+      st.anchorX = lu.x
+      if bobbing then st.bob = { x = lu.x, dip = 0, dipV = 0 } end
     end
     return
   end
   local bed = Wd.bedY(clamp(lu.x, 0, WORLD_W - 1)) - 3
   local moving = 0
-  local L = curLure()
-  if reel then
-    local dx, dy = ex - lu.x, ey - lu.y
-    local d = math.sqrt(dx * dx + dy * dy)
-    local sp = (24 + 5 * game.rod) * (fast and 2.6 or 1)
-    if d < 10 or (L.float and math.abs(dx) < 10) then retrieve(); play("click"); return end
-    if L.float then
-      -- skitters along the surface
-      lu.x = lu.x + (dx > 0 and 1 or -1) * sp * dt
-      if L.id == "popper" and rnd() < dt * 3 then Wd.addSplash(lu.x, CUT_Y, 2, 0.4); Wd.addRipple(lu.x, CUT_Y, 6) end
-    elseif L.dive and math.abs(dx) > 30 then
-      -- the lip makes it dive while it's pulled along
-      lu.x = lu.x + (dx > 0 and 1 or -1) * sp * dt
-      local want = math.min(CUT_Y + L.dive, Wd.bedY(clamp(lu.x, 0, WORLD_W - 1)) - 6)
-      lu.y = lu.y + clamp(want - lu.y, -sp * dt, sp * dt * 0.7)
-    else
-      lu.x, lu.y = lu.x + dx / d * sp * dt, lu.y + dy / d * sp * dt * 1.15
+  local sp = (24 + 5 * game.rod) * (fast and 2.6 or 1)
+  local sinkMul = 1 - 0.05 * ((game.line or 1) - 1)          -- thicker line slows the fall a little
+  if bobbing and st.bob then
+    -- A slip bobber: the float rides the surface; the bait hangs below it at the depth set by the stop.
+    -- Up and Down move the stop (shallower / deeper); A reels the whole rig in across the surface.
+    local b = st.bob
+    local upOnly = isDown("up") and not actDown("cast") and not fast
+    if upOnly then reel = false end
+    game.bobDepth = game.bobDepth or 40
+    if letOut then game.bobDepth = math.min(game.bobDepth + 28 * dt, 220); st.depthT = 1.5 end
+    if upOnly then game.bobDepth = math.max(game.bobDepth - 28 * dt, 8); st.depthT = 1.5 end
+    local bx0 = b.x
+    if reel then
+      st.lineOut = math.max(8, st.lineOut - sp * dt)
+      st.reelSpeed = sp
+      st.reelV, st.reelRate = fast and 1 or 0.7, fast and 1.7 or 1
+      lu.spin = lu.spin + dt * 14
     end
-    moving = sp
-    st.reelSpeed = sp
-    st.reelV, st.reelRate = fast and 1 or 0.7, fast and 1.7 or 1
-    lu.spin = lu.spin + dt * 14
-    lu.state = "sink"
-    if fast and rnd() < dt * 2 then Wd.spook(lu.x, lu.y, 30) end
-  elseif L.float then
-    lu.y = CUT_Y + 2
-  elseif lu.state ~= "rest" then
-    local sp = letOut and L.fast or L.sink
-    lu.y = lu.y + sp * dt
-    lu.x = lu.x + (ex > lu.x and 1 or -1) * (letOut and 2 or 0.6) * dt
-    moving = letOut and 10 or 0
-  end
-  lu.x = lu.x + Wd.flow() * dt * 5
-  if st.trolling and not reel and st.phase == "line" then
-    -- trolling: the line comes tight and tows the lure along behind the boat; how deep it runs depends on
-    -- how much line is out (let more out with Down) and how fast it sinks or dives
-    local tx2, ty2 = rodTip()
-    local dx, dy = lu.x - tx2, lu.y - ty2
-    local d = math.sqrt(dx * dx + dy * dy)
-    local out = st.lineOut or d
-    if d > out and d > 0 then
-      lu.x, lu.y = tx2 + dx / d * out, ty2 + dy / d * out
-      if L.dive then lu.y = lu.y + L.dive * 0.5 * dt end
-      moving = math.max(moving, math.abs(st.boat.v) * 2)
+    -- the main line can't be longer than what's out: a tight line drags the float toward the boat
+    local hy = CUT_Y - tipy
+    local reach = math.sqrt(math.max(0, st.lineOut * st.lineOut - hy * hy))
+    if math.abs(b.x - tipx) > reach then b.x = tipx + (b.x > tipx and 1 or -1) * reach end
+    b.x = b.x + Wd.flow() * dt * 5
+    if reel and math.abs(b.x - tipx) < 14 then retrieve(); play("click"); return end
+    local bv = math.abs(b.x - bx0) / math.max(dt, 1e-3)
+    moving = bv > 4 and bv or 0
+    -- the bait swings in under the float and sinks to the stop; a moving float lifts it a little
+    local held = st.biter and st.biter.struck
+    if not held then
+      local want = math.min(CUT_Y + game.bobDepth * (1 - math.min(0.4, bv / 80)), bed)
+      local fall = math.max(L.sink, 10) * sinkMul
+      if lu.y < want then lu.y = math.min(want, lu.y + fall * dt) else lu.y = math.max(want, lu.y - 30 * dt) end
+      lu.x = lu.x + (b.x - lu.x) * math.min(1, dt * 1.6)
+      lu.state = lu.y >= bed - 0.5 and "rest" or "sink"
+    end
+    -- the float's bob: settles after landing, twitches on nibbles, goes under on a take (set in the bite code)
+    b.dipV = b.dipV + (-b.dip * 60 - b.dipV * 9) * dt
+    b.dip = b.dip + b.dipV * dt
+    st.lureSpeed = moving
+  else
+    -- Most of the line lies on the water between the boat and the lure; the lure hangs below the point where the
+    -- line leaves the surface (the anchor), on whatever slack is left: slack = line out minus the line lying from
+    -- the rod tip to that point. So after the splash it sinks only by the slack the cast left, then holds.
+    -- Down feeds out line (more slack: it sinks deeper). Up or A winds in: first the slack goes and the lure lifts,
+    -- then the line comes tight and the lure is drawn toward the boat. A moving boat (trolling) pulls the same way.
+    st.anchorX = st.anchorX or lu.x
+    local hy = CUT_Y - tipy
+    local function lying() local dx = st.anchorX - tipx; return math.sqrt(dx * dx + hy * hy) end
+    if reel then
+      st.reelSpeed = sp
+      st.reelV, st.reelRate = fast and 1 or 0.7, fast and 1.7 or 1
+      lu.spin = lu.spin + dt * 14
+      local slack = st.lineOut - lying()
+      if slack > 3 and not L.float then
+        st.lineOut = st.lineOut - sp * 1.2 * dt
+        moving = sp * 0.5
+      else
+        local dx, dy = ex - lu.x, ey - lu.y
+        local dd = math.sqrt(dx * dx + dy * dy)
+        if dd < 10 or (L.float and math.abs(dx) < 10) then retrieve(); play("click"); return end
+        if L.float then
+          -- skitters along the surface
+          lu.x = lu.x + (dx > 0 and 1 or -1) * sp * dt
+          if L.id == "popper" and rnd() < dt * 3 then Wd.addSplash(lu.x, CUT_Y, 2, 0.4); Wd.addRipple(lu.x, CUT_Y, 6) end
+        elseif L.dive and math.abs(dx) > 30 then
+          -- the lip makes it dive while it's pulled along
+          lu.x = lu.x + (dx > 0 and 1 or -1) * sp * dt
+          local want = math.min(CUT_Y + L.dive, Wd.bedY(clamp(lu.x, 0, WORLD_W - 1)) - 6)
+          lu.y = lu.y + clamp(want - lu.y, -sp * dt, sp * dt * 0.7)
+        else
+          lu.x, lu.y = lu.x + dx / dd * sp * dt, lu.y + dy / dd * sp * dt * 1.15
+        end
+        moving = sp
+        lu.state = "sink"
+        -- the line now runs along the surface to above the lure, then down to it
+        st.anchorX = lu.x
+        st.lineOut = lying() + math.max(0, lu.y - CUT_Y)
+        if fast and rnd() < dt * 2 then Wd.spook(lu.x, lu.y, 30) end
+      end
+    else
+      if letOut and not L.float then st.lineOut = st.lineOut + 30 * dt; moving = 6 end
+      if L.float then
+        lu.y = CUT_Y + 2
+      elseif L.sink < 0 then
+        lu.y = lu.y + L.sink * dt                                  -- a floating crankbait drifts back up
+      elseif lu.state ~= "rest" then
+        lu.y = lu.y + L.sink * sinkMul * dt
+        if L.id == "spoon" then lu.x = lu.x + math.sin(st.time * 7) * 6 * dt end   -- a spoon flutters as it falls
+      end
+    end
+    local drift = Wd.flow() * dt * 5
+    lu.x, st.anchorX = lu.x + drift, st.anchorX + drift
+    -- if the boat has moved away (trolling, drifting) the line drags the anchor and the lure toward it
+    local slack = st.lineOut - lying()
+    if slack < 1 then
+      local need = math.max(0, st.lineOut - 1)
+      local reach = math.sqrt(math.max(0, need * need - hy * hy))
+      st.anchorX = tipx + (st.anchorX >= tipx and 1 or -1) * reach
+      slack = 1
+      if st.trolling then
+        moving = math.max(moving, math.abs(st.boat.v) * 2)
+        if L.dive then lu.y = lu.y + L.dive * 0.5 * dt end
+      end
+    end
+    -- the lure hangs on the slack below the anchor: it can't be farther from that point than the slack allows
+    local ax, ay = st.anchorX, CUT_Y
+    local dx, dy = lu.x - ax, lu.y - ay
+    local dd = math.sqrt(dx * dx + dy * dy)
+    if dd > slack and dd > 0 then
+      lu.x, lu.y = ax + dx / dd * slack, ay + dy / dd * slack
       if lu.state == "rest" then lu.state = "sink" end
     end
+    -- with no tension the anchor settles over the lure (the line lies straight to it)
+    if not reel then st.anchorX = st.anchorX + (lu.x - st.anchorX) * math.min(1, dt * 0.6) end
+    if lu.y >= bed then lu.y = bed; lu.state = "rest" elseif not reel and lu.state == "rest" then lu.state = "sink" end
+    if lu.y > bed then lu.y = bed end
+    if lu.y < CUT_Y + 2 then lu.y = CUT_Y + 2 end
   end
-  if lu.y >= bed then lu.y = bed; lu.state = "rest" elseif not reel and lu.state == "rest" then lu.state = "sink" end
-  if lu.y > bed then lu.y = bed end
-  if lu.y < CUT_Y + 2 then lu.y = CUT_Y + 2 end
   st.lureSpeed = moving
   -- interest
   local a = st.biter
@@ -673,6 +796,7 @@ local function updateLine(dt, reel, letOut, fast)
       a.nibbled = true
       st.twitch = 1
       play("nibble", rr(0.9, 1.1))
+      if st.bob then st.bob.dipV = st.bob.dipV + 28 end
       Wd.addRipple(ex + (lu.x - ex) * 0.15, CUT_Y, 6)
     end
     if u >= 1 then a.nibbled = false; a.nibbles = a.nibbles - 1; a.bstate, a.bt, a.wait = "inspect", 0, rr(0.7, 1.8) end
@@ -688,6 +812,11 @@ local function updateLine(dt, reel, letOut, fast)
     end
     if a.struck then
       st.window = st.window - dt
+      if st.bob then
+        -- the take: the float is pulled under and away
+        st.bob.dip = math.max(st.bob.dip, 7)
+        st.bob.x = st.bob.x + (lu.x - st.bob.x) * math.min(1, dt * 3)
+      end
       -- the fish holds the lure in its mouth and tugs
       lu.x = a.x + face * mo
       lu.y = a.y + (a.f.meta.my - a.f.meta.cy)
@@ -1355,24 +1484,27 @@ local function update(dt)
     else
       -- how much line is out: it peels off during the cast, is taken up by reeling, let out with Down,
       -- and stays put otherwise, so slack forms and lies on the water just as it would
-      local d = math.sqrt((lu.x - tx) ^ 2 + (lu.y - ty) ^ 2)
+      local ax2, ay2 = lu.x, lu.y
+      if st.bob and st.phase == "line" then ax2, ay2 = st.bob.x, CUT_Y + 1 + st.bob.dip end
+      if st.bob and st.phase == "fight" then
+        -- a hooked fish drags the float along, and pulls it under when it runs deeper than the stop
+        local b = st.bob
+        b.x = b.x + (lu.x - b.x) * math.min(1, dt * 4)
+        b.y = math.max(CUT_Y + 1, lu.y - (game.bobDepth or 40))
+        ax2, ay2 = b.x, b.y
+      end
+      local d = math.sqrt((ax2 - tx) ^ 2 + (ay2 - ty) ^ 2)
       local out = st.lineOut or d
       if lu.state == "fly" then
-        out = math.max(out, d * 1.06 + 3)
+        out = math.max(out, d * 1.03 + 2)
       elseif st.phase == "fight" then
         local want = d * (st.reeling and (1 - 0.012 * st.T) or (1.0 + 0.04 * (1 - st.T)))
         out = out + (want - out) * math.min(1, dt * 6)
-      elseif (st.reelV or 0) > 0 then
-        out = math.max(d * 0.995, out - (st.reelSpeed or 40) * dt * 1.6)
-      elseif st.lettingOut then
-        out = math.max(out, d * 1.08 + 4)
-      elseif st.trolling then
-        out = math.max(out, d)            -- towed: the line stays tight at the length you've let out
       else
-        out = math.max(out, d + 0.5)      -- the lure sinking or drifting off pulls line tight, never shorter
+        out = math.max(out, d)            -- the line's length is set in updateLine; it can't be shorter than the gap
       end
       st.lineOut = out
-      Rope.update(st.rope, dt, tx, ty, lu.x, lu.y, out, surf, wind, st.time, current, st.phase == "fight" and st.T or 0)
+      Rope.update(st.rope, dt, tx, ty, ax2, ay2, out, surf, wind, st.time, current, st.phase == "fight" and st.T or 0)
     end
   end
   if st.phase == "throw" and st.throwT > 0.45 then st.phase = "line" end
@@ -1445,6 +1577,7 @@ local function update(dt)
   end
 
   st.toastT = math.max(0, st.toastT - dt)
+  if st.depthT then st.depthT = math.max(0, st.depthT - dt) end
   Audio.musicOn = game.vol.music > 0
   Audio.setNight(G.sky.night, dt)
   local _, _, rainA = Wd.weatherAmounts()
@@ -1643,6 +1776,44 @@ local function drawLine(cam)
   Rope.draw(st.rope, cam, above, below, function(x) return Wd.surfaceY(x, st.time) end)
 end
 
+-- the bobber: a red-and-white float riding the surface, with the leader down to the bait below it
+local function drawBobber(cam)
+  if not hasBobber() then return end
+  local lu = st.lure
+  local light = G.sky.spr
+  local bx, by, under
+  if st.bob and (st.phase == "line" or st.phase == "fight") and lu.state ~= "fly" and lu.state ~= "hang" then
+    local b = st.bob
+    bx = b.x
+    by = (st.phase == "fight" and b.y) or (Wd.surfaceY(b.x, st.time) + b.dip)
+    -- leader from the float down to the bait
+    lg.setColor(0.8 * light[1], 0.88 * light[2], 0.92 * light[3], 0.4)
+    lg.line(fl(bx - cam.x) + 0.5, fl(by - cam.y + 3) + 0.5, fl(lu.x - cam.x) + 0.5, fl(lu.y - cam.y) + 0.5)
+    under = by > Wd.surfaceY(b.x, st.time) + 3
+    if st.depthT and st.depthT > 0 and st.phase == "line" then
+      local ft = math.max(1, math.floor((game.bobDepth or 40) / PX_PER_FT + 0.5))
+      UI.text("Depth " .. ft .. " ft", bx - cam.x, by - cam.y - 16, { 1, 1, 0.92, math.min(1, st.depthT * 2) }, 2, "center", { 0, 0, 0, 0.5 })
+    end
+  elseif lu.state == "fly" or lu.state == "hang" then
+    bx, by = lu.x, lu.y - 7                        -- in the air the float rides just above the bait
+  else
+    return
+  end
+  local x, y = fl(bx - cam.x), fl(by - cam.y)
+  local k = under and 0.55 or 1
+  lg.setColor(0.97 * light[1] * k, 0.96 * light[2] * k, 0.92 * light[3] * k)
+  lg.rectangle("fill", x - 2, y, 5, 3)
+  lg.setColor(0.86 * light[1] * k, 0.18 * light[2] * k, 0.14 * light[3] * k)
+  lg.rectangle("fill", x - 2, y - 3, 5, 3)
+  lg.rectangle("fill", x - 1, y - 4, 3, 1)
+  lg.setColor(0.2 * light[1], 0.2 * light[2], 0.2 * light[3])
+  lg.rectangle("fill", x, y - 6, 1, 2)
+  if not under and st.bob and lu.state ~= "fly" then
+    lg.setColor(1, 1, 1, 0.25)
+    lg.rectangle("fill", x - 4, y + 3, 9, 1)
+  end
+end
+
 local function drawUnderLine(cam)
   local lu = st.lure
   if not (st.phase == "line" or st.phase == "fight") or lu.state == "fly" or lu.state == "hang" then return end
@@ -1776,6 +1947,7 @@ local function drawAnglerAndBoat(cam)
   drawReel(pts, cam, light)
   drawPower(cam, light)
   drawLine(cam)
+  drawBobber(cam)
   -- lure hanging above water / in flight
   local lu = st.lure
   if lu.state == "hang" or lu.state == "fly" then
@@ -1929,7 +2101,8 @@ local function drawHUD()
       if petKind() ~= "none" then table.insert(hints, 3, { "X", "Pet" }) end
     elseif st.phase == "charge" then hints = { { "A", "Release to cast" } }
     elseif st.phase == "line" then
-      hints = st.biter and st.biter.struck and { { "A", "Strike!" } } or { { "A", "Reel" }, { "DOWN", "Let out" }, { "B", "Reel fast" } }
+      hints = st.biter and st.biter.struck and { { "A", "Strike!" } } or
+        (st.bob and { { "A", "Reel" }, { "UP/DOWN", "Depth" }, { "B", "Reel fast" } }) or { { "A", "Reel" }, { "DOWN", "Let out" }, { "B", "Reel fast" } }
       if hints[2] and GR.canTroll(game) then hints[#hints + 1] = { string.upper(game.binds.motor or "y"), "Motor" } end
     elseif st.phase == "fight" then hints = { { "A", "Reel - ease off when it pulls" } } end
     local a = clamp(1 - (lastInput - 6) / 2, 0.0, 1)
@@ -2038,6 +2211,10 @@ function love.load(a)
     if v == "--covers" then args.test, args.covers = true, true end
     if v == "--features" then args.test, args.features = true, true end
     if v == "--slottest" then args.test, args.slottest = true, true end
+    if v == "--casttest" then args.test, args.casttest = true, true end
+    if v == "--phystest" then args.test, args.phystest = true, true end
+    if v == "--idletest" then args.test, args.idletest = true, true end
+    if v == "--compattest" then args.test, args.slottest, args.compattest = true, true, true end
     local sl, sc, sx = v:match("^%-%-scene=(%a+),([%d.]+),(%d+)$")
     if sl then args.test, args.scene = true, { sl, tonumber(sc), tonumber(sx) } end
     if v == "--video" then args.test, args.video = true, true end
@@ -2056,6 +2233,7 @@ function love.load(a)
   Audio.load()
   Audio.loadRecorded()
   if not args.test or args.slottest then migrateSlots() end
+  G.loadPrefs()
   -- the title screen shows the place from the last slot played
   local last = tonumber(love.filesystem.read("slot.txt") or "") or 1
   G.lastSlot = clamp(last, 1, 3)
@@ -2237,7 +2415,7 @@ function runTest()
     pressed.x = true; rec(1.0)                              -- sell everything
     TB.setTab(2); rec(0.8)                                  -- the shop
     pressed.a = true; rec(0.3)
-    for _ = 1, 5 do pressed.right = true; rec(0.45) end    -- through to Motors
+    for _ = 1, 6 do pressed.right = true; rec(0.45) end    -- through to Motors
     rec(0.6)
     pressed.down = true; rec(0.5); pressed.down = true; rec(0.9)
     pressed.a = true; rec(1.6)                              -- buy the Auto Trolling Motor
@@ -2337,6 +2515,120 @@ function runTest()
     shot(string.format("scene_%s_%d_%d", l, math.floor(c * 100), x))
     love.event.quit(); return
   end
+  if args.idletest then
+    for _, loc in ipairs({ "lake", "river", "coast", "frost", "columbia" }) do
+      go(loc, 0.45, "clear"); game.idle = true; game.cooler = {}
+      local c0 = game.catches or 0
+      local bites, wasStruck = 0, false
+      sim(120, function()
+        local s2 = st.biter and st.biter.struck
+        if s2 and not wasStruck then bites = bites + 1 end
+        wasStruck = s2
+      end)
+      print(string.format("IDLE %-9s 120s: bites %d, catches %d", loc, bites, (game.catches or 0) - c0))
+    end
+    love.event.quit(); return
+  end
+  if args.compattest then
+    -- an old save (v1.0: one save.lua, no motors, bobbers, volumes or slots) must load and play
+    game = loadGame(1); G.game = game; G.slot = 1
+    print("COMPAT coins", game.coins, "loc", game.loc, "rod", game.equip.rod, "lure", game.equip.lure,
+      "motor", game.equip.motor, "bobber", game.equip.bobber, "owned.bobber", game.owned.bobber and "yes" or "no",
+      "vol", game.vol and game.vol.master or "nil", "binds.motor", game.binds.motor, "name", tostring(game.name))
+    st = newState(); st.mode = "play"; enterPlace(game.loc); applyVolume()
+    sim(1)
+    pressed.start = true; sim(1.4)
+    for tab = 1, 8 do TB.setTab(tab); sim(0.2); pressed.a = true; sim(0.1)
+      for _ = 1, 8 do pressed.right = true; sim(0.05) end
+      pressed.b = true; sim(0.1)
+    end
+    TB.close(); sim(1)
+    startCast(0.6); sim(3); testHold.down = true; sim(1); testHold.down = false
+    testHold.a = true; sim(2); testHold.a = false
+    saveGame()
+    print("COMPAT ok; saved slot 1:", love.filesystem.getInfo("save1.lua") and "yes" or "no")
+    love.event.quit(); return
+  end
+  if args.phystest then
+    go("lake", 0.45, "clear")
+    local function castWith(pw)
+      st.phase = "idle"; st.lure.state = "hang"; st.biter = nil; st.bob = nil
+      st.boat.x, st.boat.v = 900, 0; sim(0.4)
+      startCast(pw)
+      local t = 0
+      while st.lure.state == "fly" or st.lure.state == "hang" do
+        sim(1 / 30); t = t + 1 / 30
+        if os.getenv("PDBG") and math.floor(t * 30) % 5 == 0 then print(string.format("t=%.2f phase=%s state=%s x=%d y=%d throwT=%.2f ang=%.2f mode=%s", t, st.phase, st.lure.state, st.lure.x - st.boat.x, st.lure.y - CUT_Y, st.throwT or -1, st.rodAng.x, st.mode)) end
+        if t > 6 then break end
+      end
+      return math.abs(st.lure.x - st.boat.x), t
+    end
+    for _, id in ipairs({ "worm", "spinner", "jig", "popper", "fly", "plug" }) do
+      game.owned.lure[id] = true; game.equip.lure = id
+      local r = {}
+      for _, pw in ipairs({ 0, 0.5, 1 }) do local d = castWith(pw); r[#r + 1] = math.floor(d) end
+      print(string.format("CAST %-8s power 0/0.5/1 -> %d / %d / %d px", id, r[1], r[2], r[3]))
+    end
+    -- sinking: a jig with the line held, then letting out, then reeling a little
+    game.equip.lure = "jig"
+    castWith(0.6)
+    local function depth() return math.floor(st.lure.y - CUT_Y) end
+    local log = {}
+    for k = 1, 8 do sim(0.5); log[#log + 1] = depth() .. "@" .. math.floor(st.lure.x - st.boat.x) end
+    print("HOLD  depth@x every 0.5s: " .. table.concat(log, " "))
+    shot("p01_jig_held")
+    testHold.down = true; sim(1.5); testHold.down = false; sim(1.0)
+    print("LET OUT 1.5s -> depth " .. depth() .. "  lineOut " .. math.floor(st.lineOut))
+    shot("p02_jig_let_out")
+    local d0 = depth(); sim(2); print("held 2s more -> depth " .. depth() .. " (was " .. d0 .. ")")
+    testHold.up = true; sim(0.4); testHold.up = false; sim(0.2)
+    print("REEL 0.4s -> depth " .. depth())
+    -- the bobber rig
+    game.owned.bobber[2] = true; game.equip.bobber = 2; game.equip.lure = "worm"; game.bobDepth = 40
+    castWith(0.7); sim(3)
+    print(string.format("BOBBER float x %d, bait depth %d (stop %d)", math.floor(st.bob.x - st.boat.x), depth(), game.bobDepth))
+    shot("p03_bobber")
+    testHold.down = true; sim(1.2); testHold.down = false; sim(2.5)
+    print(string.format("BOBBER deeper: bait depth %d (stop %d)", depth(), math.floor(game.bobDepth)))
+    shot("p04_bobber_deeper")
+    testHold.a = true; sim(1.0); testHold.a = false; sim(0.3)
+    print(string.format("BOBBER reeled 1s: float at %d", math.floor(st.bob and (st.bob.x - st.boat.x) or -1)))
+    shot("p05_bobber_reeling")
+    love.event.quit(); return
+  end
+  if args.casttest then
+    -- many casts at random power: flag lures that fly off, never land, or a line that stretches apart
+    go("lake", 0.45, "clear")
+    local bad = 0
+    for n = 1, 300 do
+      st.phase = "idle"; st.lure.state = "hang"; st.biter = nil
+      st.boat.x = 600 + (n % 7) * 300; st.boat.v = 0
+      sim(0.3)
+      local pw = rnd()
+      pressed.a = true; testHold.a = true; sim(0.05 + pw * 0.9); testHold.a = false
+      local t, maxd, maxseg, landed = 0, 0, 0, false
+      while t < 3 do
+        sim(1 / 30); t = t + 1 / 30
+        maxd = math.max(maxd, math.abs(st.lure.x - st.boat.x))
+        if st.rope then
+          local seg = (st.lineOut or 1) / 32
+          for i = 0, 31 do
+            local a2, b2 = st.rope.pts[i], st.rope.pts[i + 1]
+            maxseg = math.max(maxseg, math.sqrt((a2.x - b2.x) ^ 2 + (a2.y - b2.y) ^ 2) / math.max(seg, 0.1))
+          end
+        end
+        if st.lure.state ~= "fly" and st.lure.state ~= "hang" then landed = true; break end
+      end
+      if not landed or maxd > 400 or maxseg > 3 then
+        bad = bad + 1
+        print(string.format("CAST %d power=%.2f landed=%s maxdist=%d stretch=%.1f phase=%s state=%s lure=(%d,%d) boat=%d T=%.2f", n, st.power or -1, tostring(landed), maxd, maxseg, st.phase, st.lure.state, st.lure.x, st.lure.y, st.boat.x, st.T or 0))
+        if bad <= 3 then shot("cast_bad_" .. n) end
+      end
+      retrieve()
+    end
+    print("CASTTEST bad", bad)
+    love.event.quit(); return
+  end
   if args.slottest then
     -- save slots: the old single save became slot 1; make a new game in slot 3, then delete slot 1
     sim(1.5); pressed.a = true; sim(0.4); shot("v01_slots")
@@ -2385,7 +2677,7 @@ function runTest()
     G.api.buy("motor", 2); sim(0.1)
     pressed.y = true; sim(0.4); shot("f11b_manual_motor_y")
     pressed.start = true; sim(1.4); TB.setTab(2); sim(0.2); pressed.a = true; sim(0.1)
-    for _ = 1, 5 do pressed.right = true; sim(0.1) end
+    for _ = 1, 6 do pressed.right = true; sim(0.1) end
     sim(0.3); shot("f11c_shop_motors"); TB.close(); sim(1)
     G.api.buy("motor", 3); sim(0.1)
     testHold.right = true; sim(1.6); shot("f12_motor_drive"); testHold.right = false; sim(1.5)
@@ -2486,6 +2778,15 @@ function runTest()
   pressed.a = true; sim(0.1)
   for _ = 1, 5 do pressed.down = true; sim(0.1) end
   pressed.a = true; sim(0.3); shot("t17_controls")
+  -- the button layout swap: keys from gptokeyb turn into the other button
+  pressed.a = true; sim(0.2)
+  love.keypressed("z"); local swappedA = pressed.b; pressed = {}
+  love.keypressed("c"); local swappedX = pressed.y; pressed = {}
+  shot("t17b_controls_swapped")
+  print("SWAP z->b " .. tostring(swappedA) .. ", c->y " .. tostring(swappedX))
+  pressed.a = true; sim(0.2)
+  love.keypressed("z"); print("UNSWAP z->a " .. tostring(pressed.a)); pressed = {}
+  pressed.down = true; sim(0.1)
   pressed.a = true; sim(0.2); shot("t18_controls_wait")
   pressed.y = true; sim(0.3); shot("t19_controls_set")
   game.binds = { cast = "a", fast = "b", pet = "x", box = "start", motor = "y" }

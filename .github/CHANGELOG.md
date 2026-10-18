@@ -1,5 +1,22 @@
 # Gone Fishing: what's new
 
+## v1.3
+- **Realistic casting.** The rod flings the lure, and air drag and line peeling off the spool slow it in flight.
+  Heavy, compact lures (jigs, spoons, plugs) cast farthest; light baits like a worm or a dry fly fall short. Thicker
+  line costs a little distance, and better rods add a little.
+- **You control the depth.** After the splash the lure sinks only on the slack the cast left, then holds. Hold
+  **Down** to feed out line and let it sink deeper; **Up** or **A** winds in, first lifting the lure, then drawing it in.
+  The lure no longer keeps sinking on its own.
+- **Bobbers.** Buy a **Slip Bobber** in the shop's new **Floats** section and fit or remove it under Gear. The float rides
+  the surface with your bait hanging below it. **Up/Down** set the depth, **A** reels the rig in. The float twitches on
+  nibbles and gets pulled under on a take.
+- **Button layout setting.** If A/B (and X/Y) are labelled the other way round on your device, swap them in
+  **Settings → Controls → Button layout**. It applies everywhere, including menus and the save screen, and is saved
+  for the device, so it holds across all save slots.
+- **Fixed:** casts could occasionally go wrong and send the lure flying off. Every cast now starts from a clean rig, and
+  a lure can't leave the water area.
+- Old saves keep working: new gear simply starts unequipped.
+
 ## v1.2
 - **Three save slots.** After pressing A on the title screen, choose a save. Start a new game in an empty slot and
   name your angler with the on-screen keyboard.

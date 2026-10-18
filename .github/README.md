@@ -24,7 +24,7 @@
 
 > **Updates:** Gone Fishing is still being worked on, and improvements and new features may be released.
 > Check back here or on the [Releases page](https://github.com/SkyWalker541/Gone-Fishing/releases) now and then for updates.
-> Updating keeps your saves; see [Updating](#updating). Current version: **v1.2**, see [what's new](CHANGELOG.md).
+> Updating keeps your saves; see [Updating](#updating). Current version: **v1.3**, see [what's new](CHANGELOG.md).
 
 <p align="center">
   <img src="images/gameplay.gif" alt="Casting, a bite and the fight" width="512">
@@ -50,7 +50,8 @@ There's no timer and no pressure. Leave it on **idle fishing** and it fishes on 
   - **Columbia River** at Hood River, Oregon: Mt. Hood drawn from survey data, the Hood River Bridge with its lift span, kiteboarders on the wind, and the river's real fish.
 - **42 fish** with their own behaviour and fight, including smallmouth bass, walleye, steelhead, chinook and coho salmon, and white sturgeon. **Five legends** each take only one lure.
 - **Ten lures** that act differently in the water: worms, spinners, jigs, diving cranks, topwater poppers, spoons, a glow jig, stink bait, a dry fly and a trolling plug.
-- **Real fishing feel:** rods with reels, a clicking drag when a fish takes line, line that sags and drifts in the current, and nibbles before the bite.
+- **Real fishing physics:** casts slowed by air drag and line off the spool (heavier lures fly farther), lures that sink on the slack and hold their depth, line you feed out or wind in to set the depth, a clicking drag when a fish takes line, and nibbles before the bite.
+- **Bobbers:** fit a slip bobber to hang your bait at a set depth and watch it twitch and go under when a fish bites.
 - **Boats and trolling motors:**
   - Row the wooden rowboat, or buy a skiff or a workboat.
   - Fit a **Trolling Motor** to steer by hand.
@@ -156,14 +157,14 @@ Keyboard: arrows move, **Z** casts and reels, **X** reels fast and goes back, **
 |--|--|
 | D-pad Left / Right | Row the boat, or drive with a trolling motor |
 | A | Hold to cast, hold to reel, press to strike |
-| Down / Up | Let line out / reel in |
+| Down / Up | Let line out (lure sinks deeper) / reel in (lure lifts). With a bobber: set the depth |
 | B | Reel fast / release a catch / back |
 | X | Pet your dog or cat |
 | Y | Trolling motor menu: on/off and speed (needs the Auto Trolling Motor) |
 | Start | Open the tackle box |
 | L / R | Tackle box sections |
 
-A, B, X, Y and Start can be remapped in **Settings > Controls**.
+A, B, X, Y and Start can be remapped in **Settings > Controls**. If A/B and X/Y are labelled the other way round on your device, set **Button layout** to **Swapped** on the same page.
 
 ## Updating
 

@@ -18,7 +18,7 @@ local TABS = {
   { id = "look", name = "Look" }, { id = "settings", name = "Settings" },
 }
 T.TABS = TABS
-local SECTIONS = { { id = "rod", name = "Rods" }, { id = "line", name = "Lines" }, { id = "lure", name = "Lures" },
+local SECTIONS = { { id = "rod", name = "Rods" }, { id = "line", name = "Lines" }, { id = "lure", name = "Lures" }, { id = "bobber", name = "Floats" },
                    { id = "cooler", name = "Coolers" }, { id = "boat", name = "Boats" }, { id = "motor", name = "Motors" } }
 local ACTIONS = { { id = "cast", name = "Cast / reel / keep" }, { id = "fast", name = "Reel fast / release" },
                   { id = "pet", name = "Pet companion" }, { id = "box", name = "Open tackle box" },
@@ -78,6 +78,7 @@ local function sectionItems(tab, sec)
   elseif sec == "lure" then for _, it in ipairs(GR.LURES) do add("lure", it.id, it) end
   elseif sec == "cooler" then for i, it in ipairs(GR.COOLERS) do add("cooler", i, it) end
   elseif sec == "motor" then for i, it in ipairs(GR.MOTORS) do add("motor", i, it) end
+  elseif sec == "bobber" then for i, it in ipairs(GR.BOBBERS) do add("bobber", i, it) end
   else for _, it in ipairs(GR.BOATS) do add("boat", it.key, it) end end
   return out
 end
@@ -100,7 +101,7 @@ local function rowsFor(id)
   if id == "log" then return #G.fishAt(s.logLoc) end
   if id == "map" then return #G.LOCS end
   if id == "look" then return #L.OPTIONS end
-  if id == "settings" then return s.sub == "controls" and #ACTIONS + 1 or s.sub == "exit" and 3 or 7 end
+  if id == "settings" then return s.sub == "controls" and #ACTIONS + 2 or s.sub == "exit" and 3 or 7 end
   return 0
 end
 
@@ -211,9 +212,19 @@ function T.update(dt, pressed)
       if o.key == "pet" or o.key == "coat" or o.key == "mark" then G.api.petHello() end
     end
   elseif tab == "settings" and s.sub == "controls" then
-    if pressed.a then
-      if i <= #ACTIONS then s.capture, s.captureDelay = ACTIONS[i].id, 2; G.play("click")
-      else g.binds = { cast = "a", fast = "b", pet = "x", box = "start", motor = "y" }; flash("Buttons reset."); G.play("buy") end
+    if i == 1 and (pressed.a or pressed.left or pressed.right) then
+      -- swap A/B and X/Y for devices whose buttons are labelled the other way round
+      G.prefs.swapButtons = not G.prefs.swapButtons
+      G.savePrefs()
+      flash(G.prefs.swapButtons and "A/B and X/Y swapped." or "Standard button layout.")
+      G.play("click")
+    elseif pressed.a then
+      if i - 1 <= #ACTIONS then s.capture, s.captureDelay = ACTIONS[i - 1].id, 2; G.play("click")
+      else
+        g.binds = { cast = "a", fast = "b", pet = "x", box = "start", motor = "y" }
+        G.prefs.swapButtons = false; G.savePrefs()
+        flash("Buttons reset."); G.play("buy")
+      end
     end
   elseif tab == "settings" and s.sub == "exit" then
     if pressed.a then
@@ -340,6 +351,8 @@ local function statLine(it)
   elseif it.kind == "line" then return "Strength", it.key
   elseif it.kind == "cooler" then return "Holds " .. d.cap .. " fish"
   elseif it.kind == "boat" then return "Speed", ({ rowboat = 1, skiff = 3, workboat = 5 })[it.key]
+  elseif it.kind == "bobber" then
+    return it.key == 1 and "Lure only" or "Holds bait at a depth"
   elseif it.kind == "motor" then
     if it.key == 1 then return "Oars or engine" end
     return it.item.auto and "Speed, auto troll" or "Speed", it.key == 2 and 2 or 4
@@ -353,14 +366,14 @@ local function pageItems(tab, t)
   local x = PX0
   for k, sec in ipairs(SECTIONS) do
     local on = k == s.section[tab]
-    local w = UI.width(sec.name, 2) + 10
+    local w = UI.width(sec.name, 2) + 8
     if on then
       lg.setColor(INK_G); lg.rectangle("fill", x, PY0 + 25, w, 13, 3, 3)
       UI.text(sec.name, x + 5, PY0 + 27, { 0.92, 0.9, 0.8 }, 2)
     else
       UI.text(sec.name, x + 5, PY0 + 27, INK_L, 2)
     end
-    x = x + w + 4
+    x = x + w + 2
   end
   local items = sectionItems(tab, SECTIONS[s.section[tab]].id)
   local key = tab .. s.section[tab]
@@ -574,21 +587,28 @@ local function pageSettings(t)
   local g = G.game
   if s.sub == "controls" then
     header("Controls", "B: back")
-    local i = sel("settingscontrols", #ACTIONS + 1)
+    local i = sel("settingscontrols", #ACTIONS + 2)
+    do
+      local y = PY0 + 26
+      rowBox(y, 15, i == 1)
+      UI.text("Button layout", PX0 + 4, y + 2, INK, 2)
+      UI.text(G.prefs.swapButtons and "< Swapped >" or "< Standard >", PX1 - 4, y + 2, INK_G, 2, "right")
+    end
     for k, a in ipairs(ACTIONS) do
-      local y = PY0 + 26 + (k - 1) * 19
-      rowBox(y, 17, k == i)
-      UI.text(a.name, PX0 + 4, y + 3, INK, 2)
+      local y = PY0 + 26 + k * 17
+      rowBox(y, 15, k + 1 == i)
+      UI.text(a.name, PX0 + 4, y + 2, INK, 2)
       if s.capture == a.id then
-        UI.text("Press a button...", PX1, y + 3, RED, 2, "right")
+        UI.text("Press a button...", PX1, y + 2, RED, 2, "right")
       else
-        UI.button(BUTTONS[g.binds[a.id]] or "?", PX1 - UI.width(BUTTONS[g.binds[a.id]] or "?", 2) - 10, y + 2)
+        UI.button(BUTTONS[g.binds[a.id]] or "?", PX1 - UI.width(BUTTONS[g.binds[a.id]] or "?", 2) - 10, y + 1)
       end
     end
-    local y = PY0 + 26 + #ACTIONS * 19
-    rowBox(y, 17, i == #ACTIONS + 1)
-    UI.text("Reset to default", PX0 + 4, y + 3, INK, 2)
-    wrap("Pick an action and press A, then press the button you want for it. The d-pad moves, lets line out and reels.",
+    local y = PY0 + 26 + (#ACTIONS + 1) * 17
+    rowBox(y, 15, i == #ACTIONS + 2)
+    UI.text("Reset to default", PX0 + 4, y + 2, INK, 2)
+    wrap(i == 1 and "If A and B (or X and Y) feel the wrong way round on your device, swap them here."
+         or "Pick an action and press A, then press the button you want for it.",
          PX0, PY1 - 32, INK_L, PX1 - PX0)
     return
   end
