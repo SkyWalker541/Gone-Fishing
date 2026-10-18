@@ -1,5 +1,9 @@
-GONE FISHING - MANUAL INSTALL WITH PORTMASTER ON NEXTUI (TrimUI Brick)
-======================================================================
+GONE FISHING - MANUAL INSTALL WITH PORTMASTER ON NEXTUI
+=======================================================
+
+Tested on the TrimUI Brick with NextUI. Gone Fishing should work on any device
+that runs PortMaster; on other systems, copy "Gone Fishing.sh" and the
+"gonefishing" folder into your usual PortMaster ports folder.
 
 By SkyWalker541 - https://github.com/SkyWalker541/Gone-Fishing
 
@@ -10,11 +14,11 @@ You need:
 
 
 1. INSTALL PORTMASTER (skip this if you already have it)
-   - On the Brick, open the Pak Store and install PortMaster ("PORTS").
+   - On the device, open the Pak Store and install PortMaster ("PORTS").
    - Or by hand: download PORTS.pakz from github.com/ben16w/minui-portmaster,
      copy it to the root of the SD card, then eject the card and restart the
-     Brick. NextUI installs it by itself.
-   - Open "Ports" once on the Brick so PortMaster can finish setting up.
+     device. NextUI installs it by itself.
+   - Open "Ports" once on the device so PortMaster can finish setting up.
 
 2. UNZIP THE GAME ON YOUR COMPUTER
    Unzip gonefishing.zip. You get two things:
@@ -29,7 +33,7 @@ You need:
 
    So you end up with:
      /Roms/Ports (PORTS)/Gone Fishing.sh
-     /Roms/Ports (PORTS)/.ports/gonefishing/gamedata/main.lua   (and the rest)
+     /Roms/Ports (PORTS)/.ports/gonefishing/gonefishing.love   (and the rest)
 
    Note: ".ports" starts with a dot, so it is a hidden folder.
      - Mac: in Finder press Cmd + Shift + . (period) to show hidden folders.
@@ -37,7 +41,7 @@ You need:
    If the .ports folder isn't there yet, create it.
 
 4. PLAY
-   Eject the SD card, put it back in the Brick, open Ports, and pick
+   Eject the SD card, put it back in the device, open Ports, and pick
    "Gone Fishing".
 
    Saves are kept in the gonefishing/saves folder.

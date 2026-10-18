@@ -132,7 +132,7 @@ Roms/
     ├── Gone Fishing.sh
     └── .ports/
         └── gonefishing/
-            ├── gamedata/
+            ├── gonefishing.love
             ├── gonefishing.gptk
             ├── licenses/
             └── saves/        (created the first time you play)
@@ -142,14 +142,14 @@ Plain-text NextUI instructions are also in [INSTALL_NEXTUI.txt](INSTALL_NEXTUI.t
 
 ### On a computer
 
-Install [LÖVE 11.5](https://love2d.org/) and run the `gamedata` folder:
+Install [LÖVE 11.5](https://love2d.org/) and open the game file with it:
 
 ```sh
-love gonefishing/gamedata
+love gonefishing/gonefishing.love
 ```
 
 Keyboard: arrows move, **Z** casts and reels, **X** reels fast and goes back, **C** pets, **V** opens the trolling menu,
-**Enter** opens the tackle box, **Q / E** switch sections. Add `--size=WxH` to try other screen sizes.
+**Enter** opens the tackle box, **Q / E** switch sections.
 
 ## Controls
 
@@ -173,42 +173,29 @@ New versions are posted on the [Releases page](https://github.com/SkyWalker541/G
 
 ## Repository layout
 
-This repository is laid out as a PortMaster port, so it can be installed directly or submitted to PortMaster as-is:
+This repository is laid out exactly as a PortMaster port:
 
 ```
 Gone Fishing.sh       the PortMaster launcher
 port.json             PortMaster port info
 gameinfo.xml          game list entry (name, description, cover)
 README.md             PortMaster notes and controls
-cover.jpg             cover art (640x480)
-screenshot.jpg        screenshot (640x480)
+cover.jpg             cover art
+screenshot.png        screenshot (640x480)
 gonefishing/
-├── gamedata/         the game itself (LÖVE 11.5, Lua source, graphics, sounds, music)
+├── gonefishing.love  the whole game in one file (LÖVE 11.5)
 ├── gonefishing.gptk  button map
 └── licenses/         license files
 .github/              this page, screenshots and the trailer (not part of the port)
 ```
 
-### Making the release zip
+The release download (`gonefishing.zip`) is these same files: the launcher and the `gonefishing/` folder, with the
+port files inside it.
 
-The release zip has the launcher and the `gonefishing/` folder, with the port files inside it:
+### Playing on a computer
 
-```sh
-mkdir -p stage/gonefishing
-cp "Gone Fishing.sh" stage/
-cp -r gonefishing/. stage/gonefishing/
-cp port.json gameinfo.xml README.md cover.jpg screenshot.jpg stage/gonefishing/
-(cd stage && zip -r ../gonefishing.zip .)
-```
-
-Attach `gonefishing.zip` to a new release on GitHub.
-
-### Running on a computer
-
-```sh
-love gonefishing/gamedata            # play
-love gonefishing/gamedata --test     # headless self-test with screenshots
-```
+Install [LÖVE 11.5](https://love2d.org/) and open `gonefishing/gonefishing.love` with it (or run
+`love gonefishing/gonefishing.love`).
 
 ## Credits and license
 
