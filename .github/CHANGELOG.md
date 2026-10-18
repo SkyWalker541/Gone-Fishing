@@ -13,13 +13,14 @@
   - Fish smell **Stink Bait** from all around, more the longer it sits.
   - Fish **rise from deep down** to take the **Popper** or the **Dry Fly**, with a splash. The popper chugs along in
     short pops.
-  - The **Diving Crank** now dives deeper.
+  - The **Diving Crank** really dives now when you reel it; before, it stayed at the surface. It also goes deeper.
   - Every fish still likes the lures it liked before. A worm now tempts most fish a little.
 - **Trolling tows your lure.** The Auto Trolling Motor now backs the boat slowly away from your cast, the way anglers
   troll with an electric motor, so the line comes tight. The lure is towed behind the boat, and diving lures swim down
   to their diving depth. Before, the boat drove toward its own lure.
 - **Bobber notes.** The tackle box now shows how well each lure works under a bobber. Worms and Stink Bait are great,
   jigs work, and spinners, cranks, poppers, spoons, flies and plugs don't.
+- A lure is never yanked up suddenly when the line comes tight, and a topwater lure a fish lets go of bobs back up.
 - Fish caught near the boat come in just outside the hull.
 - Old saves keep working; nothing in your save changes.
 
