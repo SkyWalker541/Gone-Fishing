@@ -1,5 +1,14 @@
 # Gone Fishing: what's new
 
+## v1.4.1
+- **Fixed: the lure getting stuck after taking the bobber off.** If you removed the bobber in the tackle box while
+  your lure was in the water, the lure froze and couldn't be reeled in until you put the bobber back on. Now the
+  float comes off the line properly, and the lure sinks and reels in like any other cast. Thanks to the player who
+  reported it!
+- **Fixed: the version number overlapping the stats** on the Settings page. It now sits at the end of the top row.
+- Smaller screenshot for PortMaster.
+- Old saves keep working; nothing in your save changes.
+
 ## v1.4
 - **Fixed: the bobber getting stuck at the boat.** Reeling a bobber in now brings the float steadily to just off the
   bow, and the bait then rises up to it before the rig comes out of the water. It no longer stalls against the hull or
