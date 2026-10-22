@@ -32,10 +32,6 @@ https://github.com/user-attachments/assets/41486468-13db-4d01-acbd-5987c6e74fc5
 
 <p align="center"><sub>Full quality: <a href="media/trailer.mp4">trailer.mp4</a> (download)</sub></p>
 
-<p align="center">
-  <img src="images/gameplay.gif" alt="Casting, a bite and the fight" width="512">
-</p>
-
 ---
 
 ## About the game
