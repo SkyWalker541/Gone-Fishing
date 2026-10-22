@@ -19,12 +19,18 @@
   <a href="https://github.com/SkyWalker541/Gone-Fishing/releases/latest"><b>Download the latest release</b></a> ·
   <a href="#install-with-portmaster">Install</a> ·
   <a href="#controls">Controls</a> ·
-  <a href="media/trailer.mp4">Watch the trailer</a>
+  <a href="#trailer">Watch the trailer</a>
 </p>
 
 > **Updates:** Gone Fishing is still being worked on, and improvements and new features may be released.
 > Check back here or on the [Releases page](https://github.com/SkyWalker541/Gone-Fishing/releases) now and then for updates.
 > Updating keeps your saves; see [Updating](#updating). Current version: **v1.4.1**, see [what's new](CHANGELOG.md).
+
+## Trailer
+
+https://github.com/user-attachments/assets/41486468-13db-4d01-acbd-5987c6e74fc5
+
+<p align="center"><sub>Full quality: <a href="media/trailer.mp4">trailer.mp4</a> (download)</sub></p>
 
 <p align="center">
   <img src="images/gameplay.gif" alt="Casting, a bite and the fight" width="512">
