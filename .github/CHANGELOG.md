@@ -1,5 +1,53 @@
 # Gone Fishing: what's new
 
+## v1.5
+- **A new tackle box.** It slides up, the latch flips and the lid opens. Its pages are **Cooler**, **Gear**,
+  **Achievements**, **Log**, **Map**, **Look** and **Settings**; **L / R** move between them.
+  - **Gear** is now the shop too: pick **Rods, Lines, Lures, Floats, Coolers, Boats** or **Motors** and that tray
+    rises out of the box, every item in its own labelled compartment. Buy or equip right there.
+  - On the **Cooler** page the box turns into the cooler you own.
+  - Long names and descriptions never run off the page any more: a line that doesn't fit slides sideways to show
+    the rest, and a long description scrolls.
+- **Achievements:** 65 of them (up from 22), in **Catch, Species, Skill, Gear, Life** and **Secret** (hidden until
+  you earn them). Claiming one pays coins and puts its award (a medal, trophy, rosette, plaque or certificate) in the
+  box. Some give you a **title** to wear with your name (11 to earn), and five unlock new colours on the Look page.
+  A small pop-up tells you when you've earned one. Your daily requests are on the same page.
+- **Settings, reorganised** into **Save and exit** (now at the top), **Sound**, **Gameplay**, **Graphics**, **HUD**
+  and **Controls**:
+  - **Sound:** a separate level for **Menu clicks**.
+  - **Gameplay:** **Idle fishing**, and **Auto-keep catches** (catches go straight into the cooler).
+  - **Graphics > Performance:** **Low effects (all off)** for slower devices, or turn each effect off on its own
+    (**Smooth motion**, **Sky detail**, **Detailed reflections**, **Light under the water**, **Full splashes**).
+  - **Graphics > Scenery life:** **Wild animals**, **Birds and fireflies**, **Swaying water plants**,
+    **Kiteboarders and windsurfers** and **Bridge traffic**, each **On** or **Off**.
+  - **Graphics > Time of day:** **Day and night**, **Always dawn**, **Always day**, **Always dusk** or **Always night**.
+  - **HUD:** **Coins and cooler**, **Button hints**, **Achievement pop-ups**, **Messages**, **Cast power meter** and
+    **Line tension meter**, each **On** or **Off**.
+  - **Controls:** **Swap A and B** and **Swap X and Y** are now two separate settings, each **On** or **Off**, for
+    handhelds that print either pair the other way round (before, one **Button layout** setting swapped both).
+    **X: Reset** puts every button back.
+  - **Save now** says how often the game saves on its own: every 30 seconds, and after each catch, sale and purchase.
+- **Runs well on more devices.** The first time you fish on a device, the game checks how fast it runs. If it's
+  slow, it turns on **Low effects (all off)** and tells you, with where to change it. A short tip at the start says where the
+  graphics settings are (tick **Don't show this again** to hide it).
+- **Fills any screen.** On screens that aren't 4:3 the game shows more of the water instead of black bars.
+- **Smoother motion:** scenery and fish glide in fine steps on big screens instead of jumping whole pixels.
+- **Fish, animals and your dog or cat turn round in 3D** instead of flipping. Fish face the lure to bite, hold it in
+  their mouth, and don't dither back and forth; small fish swim in schools and swim into view rather than appearing.
+- **Water and sky:** new splashes (with recorded splash sounds), rings and foam round everything on the surface,
+  better reflections, glints on the waves, light patterns on the bottom, the Milky Way at night.
+- **Your angler's Look:** hats, glasses, tops and neckwear are redrawn so each one looks like the real thing and
+  nothing looks like anything else. Glasses are now **Round** and **Square** (clear lenses) and **Sunglasses**; the
+  **Short Sleeve** top was the same as the **T-Shirt**, so it's gone (a save wearing it shows the T-shirt; aviators show as
+  sunglasses).
+- **The Columbia River:** the bridge traffic (cars, pickups, semis, box trucks, log trucks, campers) and the
+  kiteboarders and windsurfers are redrawn, to scale.
+- Cats have new meows.
+- You can cast as soon as you stop rowing or let off the motor.
+- **Fixed:** the highlight in the tackle box could vanish after switching pages with L / R.
+- **Fixed:** names and places overlapping on the save screen.
+- Old saves keep working; nothing in your save is lost.
+
 ## v1.4.1
 - **Fixed: the lure getting stuck after taking the bobber off.** If you removed the bobber in the tackle box while
   your lure was in the water, the lure froze and couldn't be reeled in until you put the bobber back on. Now the

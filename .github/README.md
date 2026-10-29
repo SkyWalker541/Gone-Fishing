@@ -24,7 +24,7 @@
 
 > **Updates:** Gone Fishing is still being worked on, and improvements and new features may be released.
 > Check back here or on the [Releases page](https://github.com/SkyWalker541/Gone-Fishing/releases) now and then for updates.
-> Updating keeps your saves; see [Updating](#updating). Current version: **v1.4.1**, see [what's new](CHANGELOG.md).
+> Updating keeps your saves; see [Updating](#updating). Current version: **v1.5**, see [what's new](CHANGELOG.md).
 
 ## Trailer
 
@@ -60,22 +60,24 @@ There's no timer and no pressure. Leave it on **idle fishing** and it fishes on 
   - The **Auto Trolling Motor** can also troll on its own while you fish, with a speed setting: it backs the boat slowly away from your cast and tows the lure, and diving lures swim down to their depth.
 - **Day and night, weather and seasons:** sunrises, storms, fog, snow, fireflies and moonlight on the water.
 - **A tackle box** with:
-  - A cooler.
-  - A shop.
-  - Gear.
-  - Goals and daily tasks.
-  - A logbook of every species.
-  - A map.
-  - A look editor.
-  - Settings.
+  - **Cooler:** sell your catch.
+  - **Gear:** buy and fit rods, lines, lures, floats, coolers, boats and motors, each category in its own tray.
+  - **Achievements:** 65 to earn, with awards, titles to wear and colours to unlock, plus daily requests.
+  - **Log:** every species you've caught, place by place.
+  - **Map:** travel between places.
+  - **Look:** dress up your angler.
+  - **Settings:** **Save and exit**, **Sound**, **Gameplay**, **Graphics**, **HUD** and **Controls**.
+- **Runs on more devices:** it checks its speed the first time and turns down the effects if it needs to, and
+  **Settings > Graphics** has **Low effects (all off)**, and lets you turn each effect and the **Scenery life** on or off one by one.
 - **Your angler, your way:**
   - Build, skin tone, eye color.
   - 14 hairstyles and facial hair.
-  - 11 hats, glasses, tops, vests, neckwear, pants and boots.
+  - 11 hats, three kinds of glasses, seven tops, vests, neckwear, pants and boots.
+  - Colours you unlock with achievements.
   - A retriever, spitz, shorthair or longhair cat as a companion.
   - The preview zooms in on whatever you're changing.
 - **Three save slots**, each with its own name typed on an on-screen keyboard, safe deleting with a double confirmation, and **Exit to title** (Settings → Save and exit) to switch saves.
-- **Sound:** recorded ambience for each place, a shuffled soundtrack, and separate volume levels for music, sound effects and nature sounds.
+- **Sound:** recorded ambience for each place, a shuffled soundtrack, and separate volume levels for music, sound effects, menu clicks and nature sounds.
 
 ## Screenshots
 
@@ -93,8 +95,10 @@ There's no timer and no pressure. Leave it on **idle fishing** and it fishes on 
 | Willow River in the rain | Driftwood Bay at sunset |
 | ![Frost Lake at night](images/frost_night.png) | ![Frost Lake](images/frost_cabin.png) |
 | Northern lights over Frost Lake | Frost Lake |
-| ![The shop](images/shop.png) | ![Look](images/look.png) |
-| The shop | Dressing up your angler |
+| ![Gear](images/gear.png) | ![Look](images/look.png) |
+| Gear: every category has its own tray | Dressing up your angler |
+| ![Achievements](images/achievements.png) | ![Settings](images/settings.png) |
+| Achievements and today's requests | Settings |
 | ![Map](images/map.png) | ![Trolling motor menu](images/trolling_menu.png) |
 | Travel between places | The trolling motor menu |
 
@@ -151,7 +155,7 @@ love gonefishing/gonefishing.love
 ```
 
 Keyboard: arrows move, **Z** casts and reels, **X** reels fast and goes back, **C** pets, **V** opens the trolling menu,
-**Enter** opens the tackle box, **Q / E** switch sections.
+**Enter** opens the tackle box, **Q / E** switch pages.
 
 ## Controls
 
@@ -162,11 +166,12 @@ Keyboard: arrows move, **Z** casts and reels, **X** reels fast and goes back, **
 | Down / Up | Let line out (lure sinks deeper) / reel in (lure lifts). With a bobber: set the depth |
 | B | Reel fast / release a catch / back |
 | X | Pet your dog or cat |
-| Y | Trolling motor menu: on/off and speed (needs the Auto Trolling Motor) |
+| Y | **Trolling motor** menu: **On - troll slowly** / **Off**, and **Speed** (needs the Auto Trolling Motor) |
 | Start | Open the tackle box |
-| L / R | Tackle box sections |
+| L / R | Tackle box pages |
 
-A, B, X, Y and Start can be remapped in **Settings > Controls**. If A/B and X/Y are labelled the other way round on your device, set **Button layout** to **Swapped** on the same page.
+A, B, X, Y and Start can be remapped in **Settings > Controls** (**X: Reset** puts them all back). If A and B, or X and Y,
+are labelled the other way round on your device, set **Swap A and B** or **Swap X and Y** to **On** on the same page.
 
 ## Updating
 
