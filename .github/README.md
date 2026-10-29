@@ -28,7 +28,7 @@
 
 ## Trailer
 
-https://github.com/user-attachments/assets/41486468-13db-4d01-acbd-5987c6e74fc5
+https://github.com/user-attachments/assets/803c8aa6-55a1-4e97-8827-6cc6d70e947d
 
 <p align="center"><sub>Full quality: <a href="media/trailer.mp4">trailer.mp4</a> (download)</sub></p>
 
