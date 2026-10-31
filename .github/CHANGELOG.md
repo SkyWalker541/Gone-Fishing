@@ -1,5 +1,28 @@
 # Gone Fishing: what's new
 
+## v1.6
+- **Fish that belong where they're caught.** Each place now has the fish that really live there. Pine Lake has
+  Pumpkinseed, Brown Bullhead and Kokanee. Willow River has Redside Shiner, Westslope Cutthroat and the new Mountain
+  Whitefish. Driftwood Bay has Pacific Mackerel, Yelloweye Rockfish, Starry Flounder, Albacore Tuna and the new Lingcod
+  and Redtail Surfperch, and the Admiral is now a giant Pacific halibut that only takes a jig on the bottom. Your
+  catches carry over to the new species.
+- **Livelier fights.** Now and then a hooked fish turns and runs at the boat, or dives under it to the other side.
+  Reel fast to keep the line tight, or it can throw the hook. Each species fights in its own way.
+- **Wildlife on the shore.** Deer, elk, moose, bears, wolves, foxes and herons, each where they really live. They
+  graze, drink and look up, pass behind the trees, and bolt if you come too close. Eagles and ospreys dive for fish,
+  and sea lions swim in Driftwood Bay. And something very rare lives deep in the Columbia...
+- **Redrawn scenery and skies.** Trees cast shadows and catch the sun, no two alike. The sky has real cloud types
+  that change with the weather and the time of day: cumulus, towering storm clouds, cirrus, mackerel skies and low
+  grey layers.
+- **New: Settings → Graphics → High detail** (all off to start, for devices with power to spare). Extra-smooth
+  motion, wind in the trees, and the boat's shadow and lantern light underwater.
+- **The lantern** now glows softly and lights the water around the boat.
+- **Keyboard support.** Under **Settings → Controls**, **Button prompts** shows controller buttons or keyboard keys,
+  and **Keyboard keys** lets you choose your own keys. Escape and the arrow keys always work.
+- **Hold a direction** in menus and on the name screen to move through them quickly.
+- **Petting** looks natural now: the angler leans over and pats with the free hand.
+- Old saves keep working.
+
 ## v1.5.1
 - **Fixed: a crash when the boat turned** while your angler wore certain tops. The hoodie (on some builds), the
   fleece and the overalls could stop the game with "Could not open file gfx/char/...". Every Look choice has since

@@ -24,7 +24,7 @@
 
 > **Updates:** Gone Fishing is still being worked on, and improvements and new features may be released.
 > Check back here or on the [Releases page](https://github.com/SkyWalker541/Gone-Fishing/releases) now and then for updates.
-> Updating keeps your saves; see [Updating](#updating). Current version: **v1.5.1**, see [what's new](CHANGELOG.md).
+> Updating keeps your saves; see [Updating](#updating). Current version: **v1.6**, see [what's new](CHANGELOG.md).
 
 ## Trailer
 
@@ -50,7 +50,7 @@ There's no timer and no pressure. Leave it on **idle fishing** and it fishes on 
   - **Driftwood Bay**: an ocean bay with a lighthouse and big fish.
   - **Frost Lake**: a winter lake with ice floes and the northern lights.
   - **Columbia River** at Hood River, Oregon: Mt. Hood drawn from survey data, the Hood River Bridge with its lift span, kiteboarders on the wind, and the river's real fish.
-- **42 fish** with their own behaviour and fight, including smallmouth bass, walleye, steelhead, chinook and coho salmon, and white sturgeon. **Five legends** each take only one lure.
+- **45 fish**, each in the place it really lives, with its own behaviour and fight: some turn and run at the boat, some bore deep. They include westslope cutthroat, kokanee, lingcod, albacore, smallmouth bass, walleye, steelhead, chinook and coho salmon, and white sturgeon. **Five legends** each take only one lure.
 - **Ten lures**, each fished its own way: worms and stink bait left still for fish to nibble or smell, spinners, spoons and diving cranks reeled for fish to chase, jigs dropped to the bottom and hopped, topwater poppers and a dry fly that fish rise to, a glow jig for the dark, and a trolling plug. The tackle box says how to fish each one and whether it works under a bobber.
 - **Real fishing physics:** casts slowed by air drag and line off the spool (heavier lures fly farther), lures that sink on the slack and hold their depth (jigs and bait drop to the bottom), line you feed out or wind in to set the depth, a clicking drag when a fish takes line, and nibbles before the bite.
 - **Bobbers:** fit a slip bobber to hang your bait at a set depth and watch it twitch and go under when a fish bites.
@@ -58,17 +58,19 @@ There's no timer and no pressure. Leave it on **idle fishing** and it fishes on 
   - Row the wooden rowboat, or buy a skiff or a workboat.
   - Fit a **Trolling Motor** to steer by hand.
   - The **Auto Trolling Motor** can also troll on its own while you fish, with a speed setting: it backs the boat slowly away from your cast and tows the lure, and diving lures swim down to their depth.
-- **Day and night, weather and seasons:** sunrises, storms, fog, snow, fireflies and moonlight on the water.
+- **Day and night, weather and seasons:** sunrises, storms, fog, snow, fireflies and moonlight on the water, and skies with real cloud types that change with the weather and the time of day.
+- **Wildlife:** deer, elk, moose, bears, wolves, foxes and herons on the shores, each where it really lives, grazing, drinking and slipping off into the trees if you come too close. Eagles and ospreys dive for fish, and sea lions swim in the bay.
 - **A tackle box** with:
   - **Cooler:** sell your catch.
   - **Gear:** buy and fit rods, lines, lures, floats, coolers, boats and motors, each category in its own tray.
-  - **Achievements:** 65 to earn, with awards, titles to wear and colours to unlock, plus daily requests.
+  - **Achievements:** 66 to earn, with awards, titles to wear and colours to unlock, plus daily requests.
   - **Log:** every species you've caught, place by place.
   - **Map:** travel between places.
   - **Look:** dress up your angler.
   - **Settings:** **Save and exit**, **Sound**, **Gameplay**, **Graphics**, **HUD** and **Controls**.
 - **Runs on more devices:** it checks its speed the first time and turns down the effects if it needs to, and
   **Settings > Graphics** has **Low effects (all off)**, and lets you turn each effect and the **Scenery life** on or off one by one.
+- **High detail** for devices with power to spare (**Settings > Graphics > High detail**, all off to start): **Extra-smooth motion**, **Wind in the trees**, and **Shadows and light underwater**.
 - **Your angler, your way:**
   - Build, skin tone, eye color.
   - 14 hairstyles and facial hair.
@@ -155,7 +157,8 @@ love gonefishing/gonefishing.love
 ```
 
 Keyboard: arrows move, **Z** casts and reels, **X** reels fast and goes back, **C** pets, **V** opens the trolling menu,
-**Enter** opens the tackle box, **Q / E** switch pages.
+**Enter** opens the tackle box, **Q / E** switch pages. Escape and the arrow keys always work. Choose your own keys in
+**Settings > Controls > Keyboard keys**, and set **Button prompts** to **Keyboard** to see keys on screen instead of buttons.
 
 ## Controls
 
