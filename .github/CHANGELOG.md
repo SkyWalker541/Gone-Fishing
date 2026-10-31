@@ -1,5 +1,19 @@
 # Gone Fishing: what's new
 
+## v1.5.1
+- **Fixed: a crash when the boat turned** while your angler wore certain tops. The hoodie (on some builds), the
+  fleece and the overalls could stop the game with "Could not open file gfx/char/...". Every Look choice has since
+  been checked in every pose and turn angle.
+- **Idle fishing is smarter:**
+  - It no longer turns the boat and casts at the same moment. It finishes turning and lets the boat settle first,
+    so the line always goes out the right side.
+  - It casts toward fish that like the lure you have on, and only turns round when the other side is clearly better.
+  - It fishes each lure its own way: bait is left still, spinners and spoons get slow pulls, the Diving Crank a
+    steady retrieve so it dives, poppers short chugs, and jigs a twitch now and then.
+  - It lets the lure down to where the fish are, reels in and tries again when nothing's interested, and moves
+    somewhere better after a few casts with nothing.
+- Old saves keep working; nothing in your save changes.
+
 ## v1.5
 - **A new tackle box.** It slides up, the latch flips and the lid opens. Its pages are **Cooler**, **Gear**,
   **Achievements**, **Log**, **Map**, **Look** and **Settings**; **L / R** move between them.
